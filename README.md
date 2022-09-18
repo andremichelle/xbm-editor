@@ -6,6 +6,9 @@
 * Any integer zoom 2x, 3x, 4x,...
 * 100% zoom, animated preview (forwards, alternate, one-shot, ...)
 
+## Links
+[xbm on wikipedia](https://en.wikipedia.org/wiki/X_BitMap)
+
 ## BUILD
 Make sure to have sass installed and run in the console:
 
