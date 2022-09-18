@@ -1,13 +1,12 @@
 # XBM Editor
+## Planned Features
 * Any number of sprites
-* Any number of frames each sprites
-* Any integer zoom 2x, 3x, 4x,...
-* 100% animated preview (forwards, alternate)
 * Any size for each sprite + name
+* Any number of frames each sprites for states / animations
+* Any integer zoom 2x, 3x, 4x,...
+* 100% zoom, animated preview (forwards, alternate, one-shot, ...)
 
-# typescript / sass
-template repository for my typescript projects
-
+## BUILD
 Make sure to have sass installed and run in the console:
 
     sass sass/main.sass:bin/main.css --watch
