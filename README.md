@@ -1,3 +1,10 @@
+# XBM Editor
+* Any number of sprites
+* Any number of frames each sprites
+* Any integer zoom 2x, 3x, 4x,...
+* 100% animated preview (forwards, alternate)
+* Any size for each sprite + name
+
 # typescript / sass
 template repository for my typescript projects
 
