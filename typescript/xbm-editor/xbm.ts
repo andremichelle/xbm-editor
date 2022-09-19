@@ -19,7 +19,7 @@ export namespace xbm {
     export type FrameFormat = {
         width: number
         height: number
-        data: number[]
+        data: ReadonlyArray<number>
     }
 
     export class Frame implements Serializer<FrameFormat> {
@@ -58,7 +58,7 @@ export namespace xbm {
             console.assert(getFrameSize(format.width, format.height) === format.data.length)
             this.width = format.width
             this.height = format.height
-            this.data = format.data
+            this.data = format.data.slice()
             return this
         }
 
@@ -108,7 +108,7 @@ export namespace xbm {
             private height: number,
             private frames: Frame[],
             private name: string) {
-
+            console.assert(this.frames.every(frame => frame.getWidth() === width && frame.getHeight() === height))
         }
 
         insertFrame(insertIndex: number = Number.MAX_SAFE_INTEGER): Frame {
@@ -119,6 +119,14 @@ export namespace xbm {
 
         getFrame(index: number): Frame {
             return this.frames[index]
+        }
+
+        getFrames(): ReadonlyArray<Frame> {
+            return this.frames
+        }
+
+        getName(): string {
+            return this.name
         }
 
         serialize(): SpriteFormat {
@@ -164,6 +172,26 @@ export namespace xbm {
 
         isSingleFrame(): boolean {
             return 1 === this.getFrameCount()
+        }
+    }
+
+    export type SheetFormat = { sprites: SpriteFormat[] }
+
+    export class Sheet implements Serializer<SheetFormat> {
+        constructor(readonly sprites: Sprite[]) { }
+
+        serialize(): SheetFormat {
+            return { sprites: this.sprites.map(sprite => sprite.serialize()) }
+        }
+
+        deserialize(format: SheetFormat): this {
+            this.sprites.splice(0, this.sprites.length)
+            throw new Error() // TODO
+            return this
+        }
+
+        toString(entriesEachLine: number = 8): string {
+            return this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n')
         }
     }
 }
