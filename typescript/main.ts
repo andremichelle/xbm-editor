@@ -1,4 +1,6 @@
-import { Boot, newAudioContext, preloadImagesOfCssFile } from "./lib/boot.js"
+import { HTML } from './lib/dom.js'
+import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
+import { XBMEncoder } from "./xbm-editor/format.js"
 
 const showProgress = (() => {
     const progress: SVGSVGElement = document.querySelector("svg.preloader") as SVGSVGElement
@@ -14,18 +16,47 @@ const showProgress = (() => {
 
     const boot = new Boot()
     boot.await('css', preloadImagesOfCssFile("./bin/main.css"))
-    const context = newAudioContext()
     await boot.awaitCompletion()
+
+
+    const encoder = new XBMEncoder(8, 14, [0x1F, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04])
+
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')!
+    const zoom = 16
+
+    canvas.width = encoder.getWidth() * zoom
+    canvas.height = encoder.getHeight() * zoom
+    canvas.style.backgroundColor = '#DDD'
+    context.fillStyle = 'black'
+
+    const update = () => {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        for (let y = 0; y < encoder.getHeight(); ++y) {
+            for (let x = 0; x < encoder.getWidth(); ++x) {
+                if (encoder.getPixel(x, y)) {
+                    context.fillRect(x * zoom, y * zoom, zoom, zoom)
+                }
+            }
+        }
+    }
+
+    console.log(encoder.toString())
+
+
+    canvas.addEventListener('pointerdown', (event: PointerEvent) => {
+        const r = canvas.getBoundingClientRect()
+        const x = Math.floor((event.clientX - r.left) / zoom)
+        const y = Math.floor((event.clientY - r.top) / zoom)
+        encoder.togglePixel(x, y)
+        update()
+    })
+
+    HTML.query('main').appendChild(canvas)
+    update()
 
     // --- BOOT ENDS ---
     const frame = () => {
-        (document.querySelector(".center") as HTMLElement).textContent = `
-            menubar.visible: ${window.menubar.visible}\n
-            devicePixelRatio: ${window.devicePixelRatio}\n
-            screenTop: ${window.screenTop}, screenLeft: ${window.screenLeft}\n
-            iw: ${window.innerWidth}, ih: ${window.innerHeight}\n
-            saw: ${window.screen.availWidth}, sah: ${window.screen.availHeight}\n
-            sw: ${window.screen.width}, sh: ${window.screen.height}`
         requestAnimationFrame(frame)
     }
     frame()
