@@ -4,19 +4,14 @@ export namespace xbm {
     const writeHeader = (width: number, height: number, prefix: string): string =>
         `#define ${prefix}_width ${width}\n#define ${prefix}_height ${height}\n`
 
-    const writeDataBlock = (data: number[], indention: string, entriesEachLine: number): string => {
-        const numLines = Math.ceil(data.length / entriesEachLine)
-        const lines = []
-        for (let i = 0; i < numLines; i++) {
-            lines.push(`${indention}${data
-                .slice(i * entriesEachLine, (i + 1) * entriesEachLine)
-                .map(byte => `0x${byte
-                    .toString(16)
-                    .toUpperCase()
-                    .padStart(2, '0')}`)}`)
-        }
-        return lines.join(',\n')
-    }
+    const writeDataBlock = (data: number[], indention: string, entriesEachLine: number): string => ArrayUtils
+        .fill(Math.ceil(data.length / entriesEachLine), lineIndex => `${indention}${data
+            .slice(lineIndex * entriesEachLine, (lineIndex + 1) * entriesEachLine)
+            .map(byte => `0x${byte
+                .toString(16)
+                .toUpperCase()
+                .padStart(2, '0')}`)}`)
+        .join(',\n')
 
     // If the image width does not match a multiple of 8, the extra bits in the last byte of each row are ignored.
     const getFrameSize = (width: number, height: number): number => height * Math.ceil(width / 8.0)
@@ -131,10 +126,10 @@ export namespace xbm {
                 name: this.name,
                 width: this.width,
                 height: this.height,
-                data: this.frames.map(frame => frame.serialize().data)
+                data: this.frames.map(frame => frame.getData())
             }
         }
-        
+
         deserialize(format: SpriteFormat): this {
             this.name = format.name
             this.width = format.width
