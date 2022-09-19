@@ -32,6 +32,7 @@ export namespace xbm {
             private width: number,
             private height: number,
             private data: number[] = []) {
+            console.assert(getFrameSize(width, height) === data.length)
         }
 
         togglePixel(x: number, y: number): void {
@@ -59,6 +60,7 @@ export namespace xbm {
         }
 
         deserialize(format: FrameFormat): this {
+            console.assert(getFrameSize(format.width, format.height) === format.data.length)
             this.width = format.width
             this.height = format.height
             this.data = format.data
@@ -101,6 +103,7 @@ export namespace xbm {
         static single(width: number, height: number, name: string): Sprite {
             return new Sprite(width, height, [new Frame(width, height, ArrayUtils.fill(getFrameSize(width, height), () => 0))], name)
         }
+
         static fromData(width: number, height: number, data: number[][], name: string): Sprite {
             return new Sprite(width, height, data.map(data => new Frame(width, height, data)), name)
         }
@@ -131,6 +134,7 @@ export namespace xbm {
                 data: this.frames.map(frame => frame.serialize().data)
             }
         }
+        
         deserialize(format: SpriteFormat): this {
             this.name = format.name
             this.width = format.width
@@ -142,8 +146,9 @@ export namespace xbm {
         toString(entriesEachLine: number = 8): string {
             if (this.isSingleFrame()) {
                 return this.frames[0].toString(this.name, entriesEachLine)
+            } else {
+                return `${writeHeader(this.width, this.height, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
             }
-            return `${writeHeader(this.width, this.height, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
         }
 
         getWidth(): number {

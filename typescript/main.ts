@@ -25,6 +25,8 @@ const showProgress = (() => {
     ], 'hero')
     const frame = sprite.getFrame(0)
     console.log(sprite.toString())
+    console.log(JSON.stringify(sprite.serialize()))
+
 
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')!
