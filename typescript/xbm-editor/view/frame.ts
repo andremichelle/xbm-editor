@@ -25,6 +25,7 @@ export class FrameView implements Terminable {
 
     terminate(): void {
         this.canvas.remove()
+        this.element.remove()
         this.terminator.terminate()
     }
 

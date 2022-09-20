@@ -1,4 +1,3 @@
-import { ValueMapping } from "./mapping.js";
 import { Random } from "./math.js";
 export declare type NoArgType<T> = {
     new (): T;
@@ -77,52 +76,6 @@ export declare class ObservableValueImpl<T> implements ObservableValue<T> {
     addObserver(observer: Observer<T>, notify?: boolean): Terminable;
     removeObserver(observer: Observer<T>): boolean;
     terminate(): void;
-}
-export declare class Parameter<T> implements ObservableValue<T> {
-    readonly valueMapping: ValueMapping<T>;
-    readonly printMapping: PrintMapping<T>;
-    private value;
-    private readonly observable;
-    constructor(valueMapping: ValueMapping<T>, printMapping: PrintMapping<T>, value: T);
-    getUnipolar(): number;
-    setUnipolar(value: number): void;
-    print(): string;
-    get(): T;
-    set(value: T): boolean;
-    addObserver(observer: Observer<T>, notify?: boolean): Terminable;
-    removeObserver(observer: Observer<T>): boolean;
-    terminate(): void;
-}
-export declare type Parser<Y> = (text: string) => Y | null;
-export declare type Printer<Y> = (value: Y) => string;
-export declare class PrintMapping<Y> {
-    private readonly parser;
-    private readonly printer;
-    private readonly preUnit;
-    private readonly postUnit;
-    static INTEGER: PrintMapping<number>;
-    static FLOAT_ONE: PrintMapping<number>;
-    static createBoolean(trueValue: string, falseValue: string): PrintMapping<boolean>;
-    static UnipolarPercent: PrintMapping<number>;
-    static RGB: PrintMapping<number>;
-    static integer(postUnit: string): PrintMapping<number>;
-    static float(numPrecision: number, preUnit: string, postUnit: string): PrintMapping<number>;
-    static smallFloat(numPrecision: number, postUnit: string): PrintMapping<number>;
-    constructor(parser: Parser<Y>, printer: Printer<Y>, preUnit?: string, postUnit?: string);
-    parse(text: string): Y | null;
-    print(value: Y): string;
-}
-export interface Stepper {
-    decrease(value: ObservableValue<number>): void;
-    increase(value: ObservableValue<number>): void;
-}
-export declare class NumericStepper implements Stepper {
-    private readonly step;
-    static Integer: NumericStepper;
-    static Hundredth: NumericStepper;
-    constructor(step?: number);
-    decrease(value: ObservableValue<number>): void;
-    increase(value: ObservableValue<number>): void;
 }
 export declare class ArrayUtils {
     static fill<T>(n: number, factory: (index: number) => T): T[];

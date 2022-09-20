@@ -32,15 +32,18 @@ export declare namespace xbm {
         height: number;
         data: number[][];
     };
-    class Sprite implements Size, Serializer<SpriteFormat> {
+    class Sprite implements Observable<Sprite>, Serializer<SpriteFormat>, Size {
         readonly width: number;
         readonly height: number;
         private name;
         static single(width: number, height: number, name: string): Sprite;
         static fromData(width: number, height: number, data: number[][], name: string): Sprite;
+        private readonly observable;
         private readonly frames;
         constructor(width: number, height: number, name: string);
+        addObserver(observer: Observer<Sprite>): Terminable;
         insertFrame(insertIndex?: number): Frame;
+        removeFrame(frame: Frame): void;
         getFrame(index: number): Frame;
         getFrames(): ReadonlyArray<Frame>;
         getName(): string;
@@ -49,6 +52,7 @@ export declare namespace xbm {
         getFrameByteSize(): number;
         getFrameCount(): number;
         isSingleFrame(): boolean;
+        terminate(): void;
     }
     type SheetFormat = {
         sprites: SpriteFormat[];

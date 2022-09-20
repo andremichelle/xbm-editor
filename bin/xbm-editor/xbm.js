@@ -84,6 +84,7 @@ export var xbm;
             this.width = width;
             this.height = height;
             this.name = name;
+            this.observable = new ObservableImpl();
             this.frames = [];
         }
         static single(width, height, name) {
@@ -96,10 +97,21 @@ export var xbm;
             data.forEach(data => sprite.insertFrame().writeData(data));
             return sprite;
         }
+        addObserver(observer) {
+            return this.observable.addObserver(observer);
+        }
         insertFrame(insertIndex = Number.MAX_SAFE_INTEGER) {
             const frame = new Frame(this);
             this.frames.splice(insertIndex, 0, frame);
+            this.observable.notify(this);
             return frame;
+        }
+        removeFrame(frame) {
+            const index = this.frames.indexOf(frame);
+            console.assert(index !== -1);
+            this.frames.splice(index, 1);
+            frame.terminate();
+            this.observable.notify(this);
         }
         getFrame(index) {
             return this.frames[index];
@@ -134,6 +146,9 @@ export var xbm;
         }
         isSingleFrame() {
             return 1 === this.getFrameCount();
+        }
+        terminate() {
+            this.observable.terminate();
         }
     }
     xbm.Sprite = Sprite;

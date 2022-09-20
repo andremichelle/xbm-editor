@@ -5,7 +5,7 @@ import { Env } from "./env.js"
 import { FrameView } from "./frame.js"
 
 export class Animation {
-    static readonly Forward = new Animation((frame: number, totalFrames: number) => frame % totalFrames)
+    static readonly Forward = new Animation((frame: number, totalFrames: number) => totalFrames <= 1 ? 0 : frame % totalFrames)
     static readonly Alternate = new Animation((frame: number, totalFrames: number) => {
         if (totalFrames <= 1) return 0
         const m = totalFrames - 1
@@ -28,6 +28,8 @@ export class SpriteView implements Terminable {
     constructor(readonly env: Env, readonly sprite: xbm.Sprite) {
         this.preview.appendChild(this.canvas)
 
+        this.terminator.with(this.sprite.addObserver(sprite => { })) // TODO
+
         this.sprite.getFrames().forEach(frame => this.addFrame(frame))
 
         let frame = 0 // Move to single source with adjustable speed
@@ -45,7 +47,9 @@ export class SpriteView implements Terminable {
     }
 
     removeFrame(frame: xbm.Frame): void {
-
+        const view = this.views.get(frame)
+        console.assert(view !== undefined)
+        view!.terminate()
     }
 
     appendChildren(parent: ParentNode): void {

@@ -45,6 +45,7 @@ export class FrameView {
     }
     terminate() {
         this.canvas.remove();
+        this.element.remove();
         this.terminator.terminate();
     }
 }

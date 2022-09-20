@@ -110,7 +110,7 @@ export namespace xbm {
         data: number[][]
     }
 
-    export class Sprite implements Size, Serializer<SpriteFormat> {
+    export class Sprite implements Observable<Sprite>, Serializer<SpriteFormat>, Size {
         static single(width: number, height: number, name: string): Sprite {
             const sprite = new Sprite(width, height, name)
             sprite.insertFrame(0)
@@ -123,18 +123,30 @@ export namespace xbm {
             return sprite
         }
 
+        private readonly observable = new ObservableImpl<this>()
+
         private readonly frames: Frame[] = []
 
-        constructor(
-            readonly width: number,
-            readonly height: number,
-            private name: string) {
+        constructor(readonly width: number, readonly height: number, private name: string) {
+        }
+
+        addObserver(observer: Observer<Sprite>): Terminable {
+            return this.observable.addObserver(observer)
         }
 
         insertFrame(insertIndex: number = Number.MAX_SAFE_INTEGER): Frame {
             const frame = new Frame(this)
             this.frames.splice(insertIndex, 0, frame)
+            this.observable.notify(this)
             return frame
+        }
+
+        removeFrame(frame: Frame): void {
+            const index = this.frames.indexOf(frame)
+            console.assert(index !== -1)
+            this.frames.splice(index, 1)
+            frame.terminate()
+            this.observable.notify(this)
         }
 
         getFrame(index: number): Frame {
@@ -176,6 +188,10 @@ export namespace xbm {
 
         isSingleFrame(): boolean {
             return 1 === this.getFrameCount()
+        }
+
+        terminate(): void {
+            this.observable.terminate()
         }
     }
 

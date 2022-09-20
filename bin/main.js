@@ -8,7 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js";
+import { Waiting } from "./lib/common.js";
 import { AnimationFrame, HTML } from './lib/dom.js';
+import { ListItem, MenuBar } from "./lib/menu.js";
 import { Env } from "./xbm-editor/view/env.js";
 import { SheetView } from "./xbm-editor/view/sheet.js";
 import { xbm } from './xbm-editor/xbm.js';
@@ -23,7 +25,8 @@ const showProgress = (() => {
     const boot = new Boot();
     boot.await('css', preloadImagesOfCssFile("./bin/main.css"));
     yield boot.awaitCompletion();
-    const sheet = new xbm.Sheet([xbm.Sprite.fromData(8, 14, [
+    const sheet = new xbm.Sheet([
+        xbm.Sprite.fromData(8, 14, [
             [0x1F, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04],
             [0x0E, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04],
             [0x04, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04]
@@ -32,34 +35,45 @@ const showProgress = (() => {
             [80, 0, 168, 0, 216, 0, 252, 1, 38, 3, 2, 2, 2, 2],
             [80, 0, 168, 0, 216, 0, 252, 1, 34, 2, 2, 2, 0, 0],
             [80, 0, 168, 0, 216, 0, 252, 1, 3, 6, 0, 0, 0, 0]
-        ], 'bat')]);
+        ], 'bat')
+    ]);
+    AnimationFrame.init();
     HTML.query('main').appendChild(new SheetView(new Env(), sheet).element);
-    HTML.query('button[data-action=open]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const files = yield window.showOpenFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' });
-            if (files.length !== 1)
-                return;
-            const file = yield files[0].getFile();
-            const text = yield file.text();
-            const json = JSON.parse(text);
+    const element = document.querySelector("nav#app-menu");
+    MenuBar.install()
+        .offset(0, 0)
+        .addButton(HTML.query("[data-menu='file']", element), ListItem.root()
+        .addListItem(ListItem.default("Open File...", "", false)
+        .onTrigger(() => __awaiter(void 0, void 0, void 0, function* () {
+        yield Waiting.forFrames(2);
+        alert('not yet');
+        if (false) {
+            try {
+                const files = yield window.showOpenFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' });
+                if (files.length !== 1)
+                    return;
+                const file = yield files[0].getFile();
+                const text = yield file.text();
+                const json = JSON.parse(text);
+                console.log('open', json);
+            }
+            catch (e) { }
         }
-        catch (e) { }
-    }));
-    HTML.query('button[data-action=save]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
+    })))
+        .addListItem(ListItem.default("Save File...", "", false)
+        .onTrigger(() => __awaiter(void 0, void 0, void 0, function* () {
         const handler = yield window.showSaveFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' });
         const fileStream = yield handler.createWritable();
         fileStream.write(new Blob([JSON.stringify(sheet.serialize())], { type: "application/json" }));
         fileStream.close();
-    }));
-    HTML.query('button[data-action=export]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
+    })))
+        .addListItem(ListItem.default("Export C++...", "", false)
+        .onTrigger(() => __awaiter(void 0, void 0, void 0, function* () {
         const handler = yield window.showSaveFilePicker({ multiple: false, suggestedName: 'sprites.h' });
         const fileStream = yield handler.createWritable();
         fileStream.write(new Blob([sheet.toString()]));
         fileStream.close();
-    }));
-    HTML.query('button[data-action=clear]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
-    }));
-    AnimationFrame.init();
+    }))));
     document.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
     document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false });
     const resize = () => document.body.style.height = `${window.innerHeight}px`;

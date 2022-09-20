@@ -6,7 +6,7 @@ export class Animation {
         this.map = map;
     }
 }
-Animation.Forward = new Animation((frame, totalFrames) => frame % totalFrames);
+Animation.Forward = new Animation((frame, totalFrames) => totalFrames <= 1 ? 0 : frame % totalFrames);
 Animation.Alternate = new Animation((frame, totalFrames) => {
     if (totalFrames <= 1)
         return 0;
@@ -25,6 +25,7 @@ export class SpriteView {
         this.frames = HTML.create('div', { class: 'frame-views' });
         this.views = new Map();
         this.preview.appendChild(this.canvas);
+        this.terminator.with(this.sprite.addObserver(sprite => { }));
         this.sprite.getFrames().forEach(frame => this.addFrame(frame));
         let frame = 0;
         this.terminator.with(AnimationFrame.add(() => {
@@ -39,6 +40,9 @@ export class SpriteView {
         this.frames.appendChild(view.element);
     }
     removeFrame(frame) {
+        const view = this.views.get(frame);
+        console.assert(view !== undefined);
+        view.terminate();
     }
     appendChildren(parent) {
         parent.appendChild(this.preview);

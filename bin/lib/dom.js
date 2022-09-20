@@ -30,8 +30,8 @@ export class HTML {
         }
         return element;
     }
-    static query(selectors) {
-        const element = document.querySelector(selectors);
+    static query(selectors, parent = document) {
+        const element = parent.querySelector(selectors);
         if (selectors === null) {
             throw new Error(`'${selectors}' not found.`);
         }
