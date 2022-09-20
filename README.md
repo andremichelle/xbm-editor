@@ -6,6 +6,9 @@
 * Any integer zoom 2x, 3x, 4x,...
 * 100% zoom, animated preview (forwards, alternate, one-shot, ...)
 
+## Preview
+[Open in browser](https://andremichelle.github.io/xbm-editor/) (Developed, tested in Chrome)
+
 ## Links
 [xbm on wikipedia](https://en.wikipedia.org/wiki/X_BitMap)
 
