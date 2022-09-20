@@ -35,7 +35,6 @@ export class FrameView {
         };
         this.terminator.with(this.frame.addObserver(this.paint));
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', (event) => {
-            console.log('view', event.button, event.buttons);
             const r = this.canvas.getBoundingClientRect();
             const z = this.env.zoom.get() | 0;
             const x = Math.floor((event.clientX - r.left) / z) | 0;
@@ -43,7 +42,6 @@ export class FrameView {
             frame.togglePixel(x, y);
         }));
         this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => {
-            console.log('menu', event.button, event.buttons);
             event.preventDefault();
             Menu.Controller.open(ListItem.root()
                 .addListItem(ListItem.default('Clear')
