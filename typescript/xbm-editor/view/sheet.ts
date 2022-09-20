@@ -5,15 +5,12 @@ import { SpriteView } from "./sprite.js"
 
 export class SheetView {
     readonly element: HTMLElement = HTML.create('div', { class: 'sheet-view' })
-    readonly spriteContainer: HTMLDivElement = HTML.create('div', { class: 'sprite-container' })
     readonly addSpriteButton = HTML.create('button', { textContent: '+' })
-    readonly spriteViews: SpriteView[]
+
+    readonly views: Map<xbm.Sprite, SpriteView> = new Map<xbm.Sprite, SpriteView>()
 
     constructor(readonly env: Env, readonly sheet: xbm.Sheet) {
-        this.spriteViews = sheet.sprites.map(sprite => new SpriteView(env, sprite))
-        this.spriteViews.forEach(view => this.spriteContainer.appendChild(view.element))
-        this.element.appendChild(this.spriteContainer)
-        this.element.appendChild(this.addSpriteButton)
+        sheet.sprites.forEach(sprite => this.addSprite(sprite))
 
         this.addSpriteButton.addEventListener('click', () => {
             const sizeInput = prompt('Enter size (w x h)', '8x8')
@@ -23,10 +20,23 @@ export class SheetView {
             if (sizeArray.some(x => isNaN(x))) return
             const name = prompt('Enter name', 'untitled')
             if (name === null || name.length === 0) return
-            const spriteView = new SpriteView(this.env, xbm.Sprite.single(sizeArray[0], sizeArray[1], name))
-            this.spriteViews.push(spriteView)
-            this.spriteContainer.appendChild(spriteView.element)
             console.log(`new name: ${name}, w: ${sizeArray[0]}, h: ${sizeArray[1]}`)
+            this.addSprite(xbm.Sprite.single(sizeArray[0], sizeArray[1], name))
         })
+    }
+
+    addSprite(sprite: xbm.Sprite): void {
+        const view = new SpriteView(this.env, sprite)
+        this.views.set(sprite, view)
+
+        this.addSpriteButton.remove()
+        view.appendChildren(this.element)
+        this.element.appendChild(this.addSpriteButton)
+    }
+
+    removeSprite(sprite: xbm.Sprite): void {
+        const view = this.views.get(sprite)
+        console.assert(view !== undefined)
+        view!.terminate()
     }
 }

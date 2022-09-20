@@ -1,10 +1,10 @@
-import { ArrayUtils, Serializer } from '../lib/common.js'
+import { ArrayUtils, Observable, ObservableImpl, Observer, Serializer, Terminable } from '../lib/common.js'
 
 export namespace xbm {
-    const writeHeader = (width: number, height: number, prefix: string): string =>
-        `#define ${prefix}_width ${width}\n#define ${prefix}_height ${height}\n`
+    const writeHeader = (size: Size, prefix: string): string =>
+        `#define ${prefix}_width ${size.width}\n#define ${prefix}_height ${size.height}\n`
 
-    const writeDataBlock = (data: number[], indention: string, entriesEachLine: number): string => ArrayUtils
+    const writeDataBlock = (data: ReadonlyArray<number>, indention: string, entriesEachLine: number): string => ArrayUtils
         .fill(Math.ceil(data.length / entriesEachLine), lineIndex => `${indention}${data
             .slice(lineIndex * entriesEachLine, (lineIndex + 1) * entriesEachLine)
             .map(byte => `0x${byte
@@ -14,32 +14,49 @@ export namespace xbm {
         .join(',\n')
 
     // If the image width does not match a multiple of 8, the extra bits in the last byte of each row are ignored.
-    const getFrameSize = (width: number, height: number): number => height * Math.ceil(width / 8.0)
+    const getFrameByteSize = (size: Size): number => size.height * Math.ceil(size.width / 8.0)
 
-    export type FrameFormat = {
-        width: number
-        height: number
-        data: ReadonlyArray<number>
+    export type FrameFormat = { data: ReadonlyArray<number> }
+
+    export interface Size {
+        readonly width: number
+        readonly height: number
     }
 
-    export class Frame implements Serializer<FrameFormat> {
+    export class Frame implements Serializer<FrameFormat>, Observable<Frame> {
+        private readonly observable: ObservableImpl<this> = new ObservableImpl<this>()
+
         constructor(
-            private width: number,
-            private height: number,
-            private data: number[] = []) {
-            console.assert(getFrameSize(width, height) === data.length)
+            readonly size: Size,
+            readonly data: number[] = ArrayUtils.fill(getFrameByteSize(size), () => 0)) {
+        }
+
+        addObserver(observer: Observer<Frame>): Terminable {
+            return this.observable.addObserver(observer)
         }
 
         togglePixel(x: number, y: number): void {
             this.setPixel(x, y, !this.getPixel(x, y))
         }
 
-        setPixel(x: number, y: number, value: boolean): void {
-            if (value) {
-                this.data[this.toByteIndex(x, y)] |= this.toBitMask(x)
-            } else {
-                this.data[this.toByteIndex(x, y)] &= ~this.toBitMask(x)
+        clear(): void {
+            if (this.data.some(x => x > 0)) {
+                this.data.fill(0)
+                this.observable.notify(this)
             }
+        }
+
+        setPixel(x: number, y: number, on: boolean): void {
+            const old = this.data[this.toByteIndex(x, y)]
+            let value = old
+            if (on) {
+                value |= this.toBitMask(x)
+            } else {
+                value &= ~this.toBitMask(x)
+            }
+            if (value === old) return
+            this.data[this.toByteIndex(x, y)] = value
+            this.observable.notify(this)
         }
 
         getPixel(x: number, y: number): boolean {
@@ -47,35 +64,34 @@ export namespace xbm {
         }
 
         serialize(): FrameFormat {
-            return {
-                width: this.width,
-                height: this.height,
-                data: this.data
-            }
-        }
-
-        deserialize(format: FrameFormat): this {
-            console.assert(getFrameSize(format.width, format.height) === format.data.length)
-            this.width = format.width
-            this.height = format.height
-            this.data = format.data.slice()
-            return this
+            return { data: this.data }
         }
 
         toString(prefix: string = 'xbm', entriesEachLine: number = 8): string {
-            return `${writeHeader(this.width, this.height, prefix)}static unsigned char ${prefix}_xbm[] PROGMEM = {\n${writeDataBlock(this.data, '\t', entriesEachLine)}\n};`
+            return `${writeHeader(this.size, prefix)}static unsigned char ${prefix}_xbm[] PROGMEM = {\n${writeDataBlock(this.data, '\t', entriesEachLine)}\n};`
         }
 
-        getWidth(): number {
-            return this.width
+        writeData(data: ReadonlyArray<number>): void {
+            data.forEach((byte: number, index: number) => this.data[index] = byte)
         }
 
-        getHeight(): number {
-            return this.height
-        }
-
-        getData(): number[] {
+        getData(): ReadonlyArray<number> {
             return this.data
+        }
+
+        paint(context: CanvasRenderingContext2D, style: string = 'white'): void {
+            context.fillStyle = style
+            for (let y = 0; y < this.size.height; ++y) {
+                for (let x = 0; x < this.size.width; ++x) {
+                    if (this.getPixel(x, y)) {
+                        context.fillRect(x, y, 1, 1)
+                    }
+                }
+            }
+        }
+
+        terminate(): void {
+            this.observable.terminate()
         }
 
         private toBitMask(x: number): number {
@@ -83,7 +99,7 @@ export namespace xbm {
         }
 
         private toByteIndex(x: number, y: number): number {
-            return y * Math.ceil(this.width / 8.0) + (x >> 3)
+            return y * Math.ceil(this.size.width / 8.0) + (x >> 3)
         }
     }
 
@@ -94,25 +110,29 @@ export namespace xbm {
         data: number[][]
     }
 
-    export class Sprite implements Serializer<SpriteFormat> {
+    export class Sprite implements Size, Serializer<SpriteFormat> {
         static single(width: number, height: number, name: string): Sprite {
-            return new Sprite(width, height, [new Frame(width, height, ArrayUtils.fill(getFrameSize(width, height), () => 0))], name)
+            const sprite = new Sprite(width, height, name)
+            sprite.insertFrame(0)
+            return sprite
         }
 
         static fromData(width: number, height: number, data: number[][], name: string): Sprite {
-            return new Sprite(width, height, data.map(data => new Frame(width, height, data)), name)
+            const sprite = new Sprite(width, height, name)
+            data.forEach(data => sprite.insertFrame().writeData(data))
+            return sprite
         }
 
+        private readonly frames: Frame[] = []
+
         constructor(
-            private width: number,
-            private height: number,
-            private frames: Frame[],
+            readonly width: number,
+            readonly height: number,
             private name: string) {
-            console.assert(this.frames.every(frame => frame.getWidth() === width && frame.getHeight() === height))
         }
 
         insertFrame(insertIndex: number = Number.MAX_SAFE_INTEGER): Frame {
-            const frame = new Frame(this.width, this.height)
+            const frame = new Frame(this)
             this.frames.splice(insertIndex, 0, frame)
             return frame
         }
@@ -134,36 +154,20 @@ export namespace xbm {
                 name: this.name,
                 width: this.width,
                 height: this.height,
-                data: this.frames.map(frame => frame.getData())
+                data: this.frames.map(frame => frame.getData().slice())
             }
-        }
-
-        deserialize(format: SpriteFormat): this {
-            this.name = format.name
-            this.width = format.width
-            this.height = format.height
-            this.frames = format.data.map(data => new Frame(format.width, format.height, data))
-            return this
         }
 
         toString(entriesEachLine: number = 8): string {
             if (this.isSingleFrame()) {
                 return this.frames[0].toString(this.name, entriesEachLine)
             } else {
-                return `${writeHeader(this.width, this.height, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
+                return `${writeHeader(this, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
             }
         }
 
-        getWidth(): number {
-            return this.width
-        }
-
-        getHeight(): number {
-            return this.height
-        }
-
-        getFrameSize(): number {
-            return getFrameSize(this.width, this.height)
+        getFrameByteSize(): number {
+            return getFrameByteSize(this)
         }
 
         getFrameCount(): number {
@@ -182,12 +186,6 @@ export namespace xbm {
 
         serialize(): SheetFormat {
             return { sprites: this.sprites.map(sprite => sprite.serialize()) }
-        }
-
-        deserialize(format: SheetFormat): this {
-            this.sprites.splice(0, this.sprites.length)
-            throw new Error() // TODO
-            return this
         }
 
         toString(entriesEachLine: number = 8): string {

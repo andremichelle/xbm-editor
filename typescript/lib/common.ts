@@ -91,9 +91,7 @@ export class Options {
 export type Observer<VALUE> = (value: VALUE) => void
 
 export interface Observable<VALUE> extends Terminable {
-    addObserver(observer: Observer<VALUE>, notify: boolean): Terminable
-
-    removeObserver(observer: Observer<VALUE>): boolean
+    addObserver(observer: Observer<VALUE>): Terminable
 }
 
 export class ObservableImpl<T> implements Observable<T> {
@@ -124,7 +122,9 @@ export class ObservableImpl<T> implements Observable<T> {
 
 export interface Serializer<T> {
     serialize(): T
+}
 
+export interface Deserializer<T> {
     deserialize(format: T): Serializer<T>
 }
 
@@ -138,10 +138,9 @@ export interface ObservableValue<T> extends Value<T>, Observable<T> {
 }
 
 export const ObservableValueVoid: ObservableValue<any> = {
-    addObserver: (observer: Observer<any>, notify: boolean): Terminable => TerminableVoid,
+    addObserver: (_: Observer<any>): Terminable => TerminableVoid,
     get: (): any => null,
-    removeObserver: (observer: Observer<any>): boolean => false,
-    set: (value: any): boolean => true,
+    set: (_: any): boolean => true,
     terminate: (): void => { }
 }
 
@@ -373,49 +372,6 @@ export class ArrayUtils {
     }
 }
 
-export interface SettingsFormat<DATA> {
-    class: string
-    data: DATA
-}
-
-export abstract class Settings<DATA> implements Observable<Settings<DATA>>, Serializer<SettingsFormat<DATA>>, Terminable {
-    protected readonly terminator: Terminator = new Terminator()
-    protected readonly observable: ObservableImpl<Settings<DATA>> = new ObservableImpl<Settings<DATA>>()
-
-    abstract deserialize(format: SettingsFormat<DATA>): Settings<DATA>
-
-    abstract serialize(): SettingsFormat<DATA>
-
-    protected pack(data: DATA): SettingsFormat<DATA> {
-        return {
-            class: this.constructor.name,
-            data: data
-        }
-    }
-
-    protected unpack(format: SettingsFormat<DATA>): DATA {
-        console.assert(this.constructor.name === format.class)
-        return format.data
-    }
-
-    protected bindValue<T>(property: ObservableValue<T>): ObservableValue<T> {
-        this.terminator.with(property.addObserver(() => this.observable.notify(this), false))
-        return this.terminator.with(property)
-    }
-
-    addObserver(observer: Observer<Settings<DATA>>): Terminable {
-        return this.observable.addObserver(observer)
-    }
-
-    removeObserver(observer: Observer<Settings<DATA>>): boolean {
-        return this.observable.removeObserver(observer)
-    }
-
-    terminate(): void {
-        this.terminator.terminate()
-    }
-}
-
 export class Waiting {
     static forFrame(): Promise<void> {
         return new Promise(resolve => requestAnimationFrame(() => resolve()))
@@ -463,22 +419,28 @@ export class Waiting {
     }
 }
 
+export type EventMaps = HTMLElementEventMap & WindowEventMap & DocumentEventMap
+export type ListenerElements = HTMLElement | Window | Document
+export type EventType<E> = keyof Pick<EventMaps, { [K in keyof EventMaps]: EventMaps[K] extends E ? K : never }[keyof EventMaps]>
+
 export class Events {
-    static preventDefault = (event: Event) => event.preventDefault()
+    static preventDefault = (event: Event): void => event.preventDefault()
 
     static async toPromise<E extends Event>(target: EventTarget, type: string): Promise<E> {
         return new Promise<E>(resolve => target
-            .addEventListener(type, (event: Event) => resolve(event as E), { once: true }))
+            .addEventListener(type, (event: Event): void => resolve(event as E), { once: true }))
     }
 
-    static bindEventListener(target: EventTarget,
-        type: string, listener: EventListenerOrEventListenerObject,
+    static bind<E extends EventMaps[keyof EventMaps]>(
+        target: ListenerElements,
+        type: EventType<E>,
+        listener: (event: E) => void,
         options?: AddEventListenerOptions): Terminable {
-        target.addEventListener(type, listener, options)
-        return { terminate: () => target.removeEventListener(type, listener, options) }
+        target.addEventListener(type, listener as EventListener, options)
+        return { terminate: () => target.removeEventListener(type, listener as EventListener, options) }
     }
 
-    static configRepeatButton(button: HTMLElement, callback: () => void): Terminable {
+    static configRepeatButton(button: EventTarget, callback: () => void): Terminable {
         const mouseDownListener = () => {
             let lastTime = Date.now()
             let delay = 500.0

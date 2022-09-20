@@ -6,12 +6,9 @@ export class SheetView {
         this.env = env;
         this.sheet = sheet;
         this.element = HTML.create('div', { class: 'sheet-view' });
-        this.spriteContainer = HTML.create('div', { class: 'sprite-container' });
         this.addSpriteButton = HTML.create('button', { textContent: '+' });
-        this.spriteViews = sheet.sprites.map(sprite => new SpriteView(env, sprite));
-        this.spriteViews.forEach(view => this.spriteContainer.appendChild(view.element));
-        this.element.appendChild(this.spriteContainer);
-        this.element.appendChild(this.addSpriteButton);
+        this.views = new Map();
+        sheet.sprites.forEach(sprite => this.addSprite(sprite));
         this.addSpriteButton.addEventListener('click', () => {
             const sizeInput = prompt('Enter size (w x h)', '8x8');
             if (sizeInput === null)
@@ -24,11 +21,21 @@ export class SheetView {
             const name = prompt('Enter name', 'untitled');
             if (name === null || name.length === 0)
                 return;
-            const spriteView = new SpriteView(this.env, xbm.Sprite.single(sizeArray[0], sizeArray[1], name));
-            this.spriteViews.push(spriteView);
-            this.spriteContainer.appendChild(spriteView.element);
             console.log(`new name: ${name}, w: ${sizeArray[0]}, h: ${sizeArray[1]}`);
+            this.addSprite(xbm.Sprite.single(sizeArray[0], sizeArray[1], name));
         });
+    }
+    addSprite(sprite) {
+        const view = new SpriteView(this.env, sprite);
+        this.views.set(sprite, view);
+        this.addSpriteButton.remove();
+        view.appendChildren(this.element);
+        this.element.appendChild(this.addSpriteButton);
+    }
+    removeSprite(sprite) {
+        const view = this.views.get(sprite);
+        console.assert(view !== undefined);
+        view.terminate();
     }
 }
 //# sourceMappingURL=sheet.js.map

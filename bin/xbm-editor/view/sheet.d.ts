@@ -5,8 +5,9 @@ export declare class SheetView {
     readonly env: Env;
     readonly sheet: xbm.Sheet;
     readonly element: HTMLElement;
-    readonly spriteContainer: HTMLDivElement;
     readonly addSpriteButton: HTMLButtonElement;
-    readonly spriteViews: SpriteView[];
+    readonly views: Map<xbm.Sprite, SpriteView>;
     constructor(env: Env, sheet: xbm.Sheet);
+    addSprite(sprite: xbm.Sprite): void;
+    removeSprite(sprite: xbm.Sprite): void;
 }

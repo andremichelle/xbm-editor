@@ -89,10 +89,9 @@ export class ObservableImpl {
     }
 }
 export const ObservableValueVoid = {
-    addObserver: (observer, notify) => TerminableVoid,
+    addObserver: (_) => TerminableVoid,
     get: () => null,
-    removeObserver: (observer) => false,
-    set: (value) => true,
+    set: (_) => true,
     terminate: () => { }
 };
 export class ObservableValueImpl {
@@ -290,35 +289,6 @@ ArrayUtils.binarySearch = (array, key) => {
     }
     return high;
 };
-export class Settings {
-    constructor() {
-        this.terminator = new Terminator();
-        this.observable = new ObservableImpl();
-    }
-    pack(data) {
-        return {
-            class: this.constructor.name,
-            data: data
-        };
-    }
-    unpack(format) {
-        console.assert(this.constructor.name === format.class);
-        return format.data;
-    }
-    bindValue(property) {
-        this.terminator.with(property.addObserver(() => this.observable.notify(this), false));
-        return this.terminator.with(property);
-    }
-    addObserver(observer) {
-        return this.observable.addObserver(observer);
-    }
-    removeObserver(observer) {
-        return this.observable.removeObserver(observer);
-    }
-    terminate() {
-        this.terminator.terminate();
-    }
-}
 export class Waiting {
     static forFrame() {
         return new Promise(resolve => requestAnimationFrame(() => resolve()));
@@ -367,7 +337,7 @@ export class Events {
                 .addEventListener(type, (event) => resolve(event), { once: true }));
         });
     }
-    static bindEventListener(target, type, listener, options) {
+    static bind(target, type, listener, options) {
         target.addEventListener(type, listener, options);
         return { terminate: () => target.removeEventListener(type, listener, options) };
     }

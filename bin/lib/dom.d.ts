@@ -1,3 +1,4 @@
+import { Terminable } from "./common.js";
 declare type Attributes = {
     [name in 'textContent' | 'class' | string]: number | string | boolean;
 };
@@ -25,5 +26,12 @@ export declare class SVG {
     static createPath(attributes?: Attributes): SVGPathElement & HTMLElement;
     static compilePathString(dx?: number, dy?: number): SVGPathBuilder;
     static func(fn: (x: number) => number, w: number, h: number, step?: number): string;
+}
+export declare type Exec = () => void;
+export declare class AnimationFrame {
+    static add(exec: Exec): Terminable;
+    static init(): void;
+    static start(): void;
+    private static list;
 }
 export {};

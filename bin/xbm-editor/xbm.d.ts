@@ -1,24 +1,28 @@
-import { Serializer } from '../lib/common.js';
+import { Observable, Observer, Serializer, Terminable } from '../lib/common.js';
 export declare namespace xbm {
     type FrameFormat = {
-        width: number;
-        height: number;
         data: ReadonlyArray<number>;
     };
-    class Frame implements Serializer<FrameFormat> {
-        private width;
-        private height;
-        private data;
-        constructor(width: number, height: number, data?: number[]);
+    interface Size {
+        readonly width: number;
+        readonly height: number;
+    }
+    class Frame implements Serializer<FrameFormat>, Observable<Frame> {
+        readonly size: Size;
+        readonly data: number[];
+        private readonly observable;
+        constructor(size: Size, data?: number[]);
+        addObserver(observer: Observer<Frame>): Terminable;
         togglePixel(x: number, y: number): void;
-        setPixel(x: number, y: number, value: boolean): void;
+        clear(): void;
+        setPixel(x: number, y: number, on: boolean): void;
         getPixel(x: number, y: number): boolean;
         serialize(): FrameFormat;
-        deserialize(format: FrameFormat): this;
         toString(prefix?: string, entriesEachLine?: number): string;
-        getWidth(): number;
-        getHeight(): number;
-        getData(): number[];
+        writeData(data: ReadonlyArray<number>): void;
+        getData(): ReadonlyArray<number>;
+        paint(context: CanvasRenderingContext2D, style?: string): void;
+        terminate(): void;
         private toBitMask;
         private toByteIndex;
     }
@@ -28,24 +32,21 @@ export declare namespace xbm {
         height: number;
         data: number[][];
     };
-    class Sprite implements Serializer<SpriteFormat> {
-        private width;
-        private height;
-        private frames;
+    class Sprite implements Size, Serializer<SpriteFormat> {
+        readonly width: number;
+        readonly height: number;
         private name;
         static single(width: number, height: number, name: string): Sprite;
         static fromData(width: number, height: number, data: number[][], name: string): Sprite;
-        constructor(width: number, height: number, frames: Frame[], name: string);
+        private readonly frames;
+        constructor(width: number, height: number, name: string);
         insertFrame(insertIndex?: number): Frame;
         getFrame(index: number): Frame;
         getFrames(): ReadonlyArray<Frame>;
         getName(): string;
         serialize(): SpriteFormat;
-        deserialize(format: SpriteFormat): this;
         toString(entriesEachLine?: number): string;
-        getWidth(): number;
-        getHeight(): number;
-        getFrameSize(): number;
+        getFrameByteSize(): number;
         getFrameCount(): number;
         isSingleFrame(): boolean;
     }
@@ -56,7 +57,6 @@ export declare namespace xbm {
         readonly sprites: Sprite[];
         constructor(sprites: Sprite[]);
         serialize(): SheetFormat;
-        deserialize(format: SheetFormat): this;
         toString(entriesEachLine?: number): string;
     }
 }

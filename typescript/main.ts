@@ -1,5 +1,5 @@
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
-import { HTML } from './lib/dom.js'
+import { AnimationFrame, HTML } from './lib/dom.js'
 import { Env } from "./xbm-editor/view/env.js"
 import { SheetView } from "./xbm-editor/view/sheet.js"
 import { xbm } from './xbm-editor/xbm.js'
@@ -39,7 +39,7 @@ const showProgress = (() => {
             const file = await files[0].getFile()
             const text = await file.text()
             const json = JSON.parse(text)
-            sheet.deserialize(json)
+            // TODO
         } catch (e) { }
     })
     HTML.query('button[data-action=save]').addEventListener('click', async () => {
@@ -57,6 +57,8 @@ const showProgress = (() => {
     HTML.query('button[data-action=clear]').addEventListener('click', async () => {
         // TODO
     })
+
+    AnimationFrame.init()
 
     // --- BOOT ENDS ---
 

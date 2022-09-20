@@ -46,8 +46,7 @@ export declare class Options {
 }
 export declare type Observer<VALUE> = (value: VALUE) => void;
 export interface Observable<VALUE> extends Terminable {
-    addObserver(observer: Observer<VALUE>, notify: boolean): Terminable;
-    removeObserver(observer: Observer<VALUE>): boolean;
+    addObserver(observer: Observer<VALUE>): Terminable;
 }
 export declare class ObservableImpl<T> implements Observable<T> {
     private readonly observers;
@@ -58,6 +57,8 @@ export declare class ObservableImpl<T> implements Observable<T> {
 }
 export interface Serializer<T> {
     serialize(): T;
+}
+export interface Deserializer<T> {
     deserialize(format: T): Serializer<T>;
 }
 export interface Value<T> {
@@ -129,22 +130,6 @@ export declare class ArrayUtils {
     static binarySearch: <T>(array: ArrayLike<any> | T[], key: number) => number;
     private constructor();
 }
-export interface SettingsFormat<DATA> {
-    class: string;
-    data: DATA;
-}
-export declare abstract class Settings<DATA> implements Observable<Settings<DATA>>, Serializer<SettingsFormat<DATA>>, Terminable {
-    protected readonly terminator: Terminator;
-    protected readonly observable: ObservableImpl<Settings<DATA>>;
-    abstract deserialize(format: SettingsFormat<DATA>): Settings<DATA>;
-    abstract serialize(): SettingsFormat<DATA>;
-    protected pack(data: DATA): SettingsFormat<DATA>;
-    protected unpack(format: SettingsFormat<DATA>): DATA;
-    protected bindValue<T>(property: ObservableValue<T>): ObservableValue<T>;
-    addObserver(observer: Observer<Settings<DATA>>): Terminable;
-    removeObserver(observer: Observer<Settings<DATA>>): boolean;
-    terminate(): void;
-}
 export declare class Waiting {
     static forFrame(): Promise<void>;
     static forFrames(count: number): Promise<void>;
@@ -153,9 +138,14 @@ export declare class Waiting {
     static forEvent(element: Element, type: string): Promise<void>;
     private static forEvents;
 }
+export declare type EventMaps = HTMLElementEventMap & WindowEventMap & DocumentEventMap;
+export declare type ListenerElements = HTMLElement | Window | Document;
+export declare type EventType<E> = keyof Pick<EventMaps, {
+    [K in keyof EventMaps]: EventMaps[K] extends E ? K : never;
+}[keyof EventMaps]>;
 export declare class Events {
     static preventDefault: (event: Event) => void;
     static toPromise<E extends Event>(target: EventTarget, type: string): Promise<E>;
-    static bindEventListener(target: EventTarget, type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions): Terminable;
-    static configRepeatButton(button: HTMLElement, callback: () => void): Terminable;
+    static bind<E extends EventMaps[keyof EventMaps]>(target: ListenerElements, type: EventType<E>, listener: (event: E) => void, options?: AddEventListenerOptions): Terminable;
+    static configRepeatButton(button: EventTarget, callback: () => void): Terminable;
 }

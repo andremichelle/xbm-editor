@@ -12,58 +12,69 @@ nav
   > button
     padding: 0 4px
 
+$OUTLINE: 1px rgba(white, 0.1) solid
+
 main
   div.sheet-view
     width: min-content
     height: min-content
-    display: flex
-    flex-direction: column
-    gap: 8px
+    display: grid
+    grid-template-columns: min-content 24px min-content
+    column-gap: 0
+    row-gap: 16px
+    > div.preview
+      margin: 0 24px
+      display: flex
+      align-items: center
+      justify-content: center
+      > canvas
+        padding: 8px
+        border-radius: 3px
+        background-color: black
+        image-rendering: pixelated
+    > h1
+      margin: 0
+      padding: 0 4px
+      font-size: 13px
+      line-height: 22px
+      width: 16px
+      font-weight: bolder
+      text-align: center
+      white-space: nowrap
+      color: rgba(white, 0.8)
+      background-color: #111
+      writing-mode: vertical-rl
+      rotate: 180deg
+      border-radius: 0 8px 8px 0
+      border-top: $OUTLINE
+      border-right: $OUTLINE
+      border-bottom: $OUTLINE
+      overflow: hidden
+    > div.frame-views
+      min-height: 64px
+      display: flex
+      flex-direction: row
+      padding: 8px
+      gap: 8px
+      width: min-content
+      border-top: $OUTLINE
+      border-right: $OUTLINE
+      border-bottom: $OUTLINE
+      background-color: #111
+      > div.frame-view
+        display: flex
+        flex-direction: column
+        overflow: hidden
+        box-shadow: 0 0 1px 0 rgba(black, 0.5) inset
+        > canvas
+          cursor: pointer
+          image-rendering: pixelated
     > button
+      margin: 0 0 0 3px
       font-size: 15px
       line-height: 14px
       white-space: nowrap
       border-radius: 10px
       width: 20px
       height: 20px
-    > div.sprite-container
-      display: flex
-      flex-direction: column
-      gap: 8px
-      > div.sprite-view
-        display: flex
-        flex-direction: row
-        gap: 8px
-        padding: 8px
-        width: min-content
-        height: min-content
-        border-radius: 2px
-        background-color: #1A1A1A
-        > h1
-          margin: 0
-          padding: 0 4px
-          font-size: 12px
-          width: 16px
-          font-weight: bolder
-          text-align: center
-          white-space: nowrap
-          color: white
-          background-color: black
-          writing-mode: vertical-rl
-          rotate: 180deg
-          border-radius: 1px
-          overflow: hidden
-        > div.frame-container
-          display: flex
-          flex-direction: row
-          gap: 8px
-          > div.frame-view
-            display: flex
-            flex-direction: column
-            gap: 2px
-            border-radius: 1px
-            overflow: hidden
-            box-shadow: 0 0 1px 0 rgba(black, 0.5) inset
-            > canvas
-              cursor: pointer
-              image-rendering: pixelated
+      grid-column: 2 / 3

@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js";
-import { HTML } from './lib/dom.js';
+import { AnimationFrame, HTML } from './lib/dom.js';
 import { Env } from "./xbm-editor/view/env.js";
 import { SheetView } from "./xbm-editor/view/sheet.js";
 import { xbm } from './xbm-editor/xbm.js';
@@ -42,7 +42,6 @@ const showProgress = (() => {
             const file = yield files[0].getFile();
             const text = yield file.text();
             const json = JSON.parse(text);
-            sheet.deserialize(json);
         }
         catch (e) { }
     }));
@@ -60,6 +59,7 @@ const showProgress = (() => {
     }));
     HTML.query('button[data-action=clear]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
     }));
+    AnimationFrame.init();
     document.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
     document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false });
     const resize = () => document.body.style.height = `${window.innerHeight}px`;

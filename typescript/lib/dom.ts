@@ -1,3 +1,5 @@
+import { Terminable } from "./common.js"
+
 type Attributes = {
     [name in 'textContent' | 'class' | string]: number | string | boolean
 }
@@ -175,4 +177,51 @@ export class SVG {
             .for(step, w + step, step, (builder, x) => builder.lineTo(x, fy(x * scaleX)))
             .build()
     }
+}
+
+export type Exec = () => void
+
+export class AnimationFrame {
+    static add(exec: Exec): Terminable {
+        if (AnimationFrame.list.length === 0) {
+            AnimationFrame.start()
+        }
+        AnimationFrame.list.push(exec)
+        return {
+            terminate: () => {
+                const index = AnimationFrame.list.indexOf(exec)
+                console.assert(-1 < index)
+                AnimationFrame.list.splice(index, 1)
+            }
+        }
+    }
+
+    static init(): void {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.debug('AnimationFrame stop (will hide)', Date.now())
+            } else {
+                AnimationFrame.start()
+            }
+        })
+    }
+
+    static start(): void {
+        const exe = () => {
+            if (AnimationFrame.list.length > 0) {
+                AnimationFrame.list.forEach(e => e())
+                if (document.hidden) {
+                    console.debug('AnimationFrame stop (hidden)')
+                } else {
+                    window.requestAnimationFrame(exe)
+                }
+            } else {
+                console.debug('AnimationFrame stop (no callbacks)')
+            }
+        }
+        console.debug('AnimationFrame start', Date.now())
+        window.requestAnimationFrame(exe)
+    }
+
+    private static list: Exec[] = []
 }
