@@ -1,7 +1,7 @@
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
 import { Waiting } from "./lib/common.js"
 import { AnimationFrame, HTML } from './lib/dom.js'
-import { ListItem, MenuBar } from "./lib/menu.js"
+import { ListItem, Menu, MenuBar } from "./lib/menu.js"
 import { Env } from "./xbm-editor/view/env.js"
 import { SheetView } from "./xbm-editor/view/sheet.js"
 import { xbm } from './xbm-editor/xbm.js'
@@ -77,6 +77,10 @@ const showProgress = (() => {
 
     // prevent dragging entire document on mobile
     document.addEventListener('touchmove', (event: TouchEvent) => event.preventDefault(), { passive: false })
+    document.addEventListener('pointerdown', (event: PointerEvent) => {
+        if (event.ctrlKey) event.stopImmediatePropagation()
+    }, { capture: true })
+    document.addEventListener('contextmenu', () => Menu.Controller.close(), { capture: true })
     document.addEventListener('dblclick', (event: Event) => event.preventDefault(), { passive: false })
     const resize = () => document.body.style.height = `${window.innerHeight}px`
     window.addEventListener("resize", resize)

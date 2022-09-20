@@ -1,6 +1,7 @@
 import { HTML } from "../../lib/dom.js"
 import { xbm } from "../xbm.js"
 import { Events, Terminable, Terminator } from './../../lib/common.js'
+import { ListItem, Menu } from './../../lib/menu.js'
 import { Env } from "./env.js"
 
 export class FrameView implements Terminable {
@@ -13,11 +14,19 @@ export class FrameView implements Terminable {
     constructor(readonly env: Env, readonly frame: xbm.Frame) {
         this.terminator.with(this.frame.addObserver(this.paint))
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', (event: PointerEvent) => {
+            console.log('view', event.button, event.buttons)
             const r = this.canvas.getBoundingClientRect()
             const z = this.env.zoom.get() | 0
             const x = Math.floor((event.clientX - r.left) / z) | 0
             const y = Math.floor((event.clientY - r.top) / z) | 0
             frame.togglePixel(x, y)
+        }))
+        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event: MouseEvent) => {
+            console.log('menu', event.button, event.buttons)
+            event.preventDefault()
+            Menu.Controller.open(ListItem.root()
+                .addListItem(ListItem.default('Clear')
+                    .onTrigger(() => this.frame.clear())), event.clientX, event.clientY, false)
         }))
         this.element.appendChild(this.canvas)
         this.paint()

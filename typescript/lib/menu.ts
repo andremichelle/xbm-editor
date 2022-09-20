@@ -29,7 +29,7 @@ export class ListItem {
         return new ListItem(null)
     }
 
-    static default(label: string, shortcut: string, checked: boolean) {
+    static default(label: string, shortcut: string = '', checked: boolean = false) {
         return new ListItem(new ListItemDefaultData(label, shortcut, checked))
     }
 
@@ -123,7 +123,7 @@ class Controller {
         }
     }
 
-    open(listItem: ListItem, onClose: () => void, x: number, y: number, docked: boolean) {
+    open(listItem: ListItem, x: number, y: number, docked: boolean, onClose: () => void = () => {}) {
         if (null === this.layer) {
             this.layer = document.createElement("div")
             this.layer.classList.add("menu-layer")
@@ -140,7 +140,7 @@ class Controller {
 
     close() {
         if (null === this.root) {
-            throw new Error("Cannot close root.")
+            return
         }
         if (this.onClose !== null) {
             this.onClose()
@@ -437,7 +437,7 @@ export class MenuBar {
             this.openListItem = null
             button.classList.remove("selected")
         }
-        Menu.Controller.open(listItem, onClose, x, y, true)
+        Menu.Controller.open(listItem, x, y, true, onClose)
         this.openListItem = listItem
     }
 }

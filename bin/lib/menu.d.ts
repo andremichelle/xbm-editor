@@ -17,7 +17,7 @@ export declare class ListItem {
     private isOpening;
     constructor(data: any);
     static root(): ListItem;
-    static default(label: string, shortcut: string, checked: boolean): ListItem;
+    static default(label: string, shortcut?: string, checked?: boolean): ListItem;
     addListItem(listItem: ListItem): ListItem;
     opening(): void;
     trigger(): void;
@@ -36,7 +36,7 @@ declare class Controller {
     private layer;
     private onClose;
     constructor();
-    open(listItem: ListItem, onClose: () => void, x: number, y: number, docked: boolean): void;
+    open(listItem: ListItem, x: number, y: number, docked: boolean, onClose?: () => void): void;
     close(): void;
     onDispose(pullDown: Menu): void;
     shutdown(): void;
