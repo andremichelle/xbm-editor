@@ -19,44 +19,52 @@ main
     display: flex
     flex-direction: column
     gap: 8px
-    > div.sprite-view
+    > button
+      font-size: 15px
+      line-height: 14px
+      white-space: nowrap
+      border-radius: 10px
+      width: 20px
+      height: 20px
+    > div.sprite-container
       display: flex
-      flex-direction: row
+      flex-direction: column
       gap: 8px
-      padding: 8px
-      width: min-content
-      height: min-content
-      border-radius: 2px
-      background-color: black
-      > h1
-        margin: 0
-        font-size: 12px
-        font-weight: bold
-        text-align: center
-        white-space: nowrap
-        color: #111
-        background-color: white
-        writing-mode: vertical-rl
-        rotate: 180deg
-        border-radius: 1px
-      > div.frame-container
+      > div.sprite-view
         display: flex
         flex-direction: row
         gap: 8px
-        > div.frame-view
-          display: flex
-          flex-direction: column
-          gap: 1px
-          padding: 1px
+        padding: 8px
+        width: min-content
+        height: min-content
+        border-radius: 2px
+        background-color: #202327
+        > h1
+          margin: 0
+          padding: 0 4px
+          font-size: 12px
+          width: 16px
+          font-weight: bolder
+          text-align: center
+          white-space: nowrap
+          color: white
+          background-color: rgba(black, 0.3)
+          writing-mode: vertical-rl
+          rotate: 180deg
           border-radius: 1px
-          background-color: darken(white, 1%)
-          > canvas
-            cursor: pointer
-            background-color: white
-            image-rendering: pixelated
-          > footer
+          overflow: hidden
+        > div.frame-container
+          display: flex
+          flex-direction: row
+          gap: 8px
+          > div.frame-view
             display: flex
-            flex-direction: row
-            height: 16px
+            flex-direction: column
+            gap: 2px
             border-radius: 1px
-            background-color: black
+            overflow: hidden
+            box-shadow: 0 0 1px 0 rgba(black, 0.5) inset
+            > canvas
+              cursor: pointer
+              image-rendering: pixelated
+              background-color: rgba(black, 0.3)
