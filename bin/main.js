@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js";
 import { HTML } from './lib/dom.js';
-import { Env, SheetView } from "./xbm-editor/view.js";
+import { Env } from "./xbm-editor/view/env.js";
+import { SheetView } from "./xbm-editor/view/sheet.js";
 import { xbm } from './xbm-editor/xbm.js';
 const showProgress = (() => {
     const progress = document.querySelector("svg.preloader");
@@ -31,7 +32,7 @@ const showProgress = (() => {
             [80, 0, 168, 0, 216, 0, 252, 1, 38, 3, 2, 2, 2, 2],
             [80, 0, 168, 0, 216, 0, 252, 1, 34, 2, 2, 2, 0, 0],
             [80, 0, 168, 0, 216, 0, 252, 1, 3, 6, 0, 0, 0, 0]
-        ], 'spider')]);
+        ], 'bat')]);
     HTML.query('main').appendChild(new SheetView(new Env(), sheet).element);
     HTML.query('button[data-action=open]').addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
         try {

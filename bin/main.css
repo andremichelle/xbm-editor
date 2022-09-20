@@ -7,7 +7,7 @@ html, body {
   -webkit-overflow-scrolling: touch;
   touch-action: manipulation;
   color: #eaeaea;
-  background-color: #1A1A1A;
+  background-color: #202020;
 }
 
 html {
@@ -305,7 +305,7 @@ main div.sheet-view > div.sprite-container > div.sprite-view {
   height: -moz-min-content;
   height: min-content;
   border-radius: 2px;
-  background-color: #202327;
+  background-color: #1A1A1A;
 }
 main div.sheet-view > div.sprite-container > div.sprite-view > h1 {
   margin: 0;
@@ -316,7 +316,7 @@ main div.sheet-view > div.sprite-container > div.sprite-view > h1 {
   text-align: center;
   white-space: nowrap;
   color: white;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: black;
   -ms-writing-mode: tb-rl;
       writing-mode: vertical-rl;
   rotate: 180deg;
@@ -341,5 +341,4 @@ main div.sheet-view > div.sprite-container > div.sprite-view > div.frame-contain
   -ms-interpolation-mode: nearest-neighbor;
       image-rendering: -moz-crisp-edges;
       image-rendering: pixelated;
-  background-color: rgba(0, 0, 0, 0.3);
 }/*# sourceMappingURL=main.css.map */
