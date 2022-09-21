@@ -1,3 +1,4 @@
+@charset "UTF-8";
 html, body {
   margin: 0;
   padding: 0;
@@ -157,6 +158,10 @@ nav.menu {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 8px 8px 0 rgba(0, 0, 0, 0.3);
   pointer-events: all;
 }
+nav.menu.docked {
+  margin: 2px 0 0 0;
+  padding: 6px 0 8px 0;
+}
 nav.menu.shutdown {
   pointer-events: none;
 }
@@ -261,15 +266,23 @@ nav.menu > div.scroll.scrolling {
   color: #DDD;
 }
 
-nav {
+div.top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  position: absolute;
+  background-color: black;
+}
+div.top > nav {
   top: 0;
   left: 0;
   padding: 8px;
-  position: absolute;
+  position: absoluteØ;
   display: flex;
   gap: 8px;
 }
-nav > button {
+div.top > nav > button {
   padding: 0 4px;
 }
 
