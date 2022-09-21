@@ -82,9 +82,14 @@ export class SpriteView implements Terminable {
 
                 }),
                 ListItem.default('Delete Frame').onTrigger(() => {
-                    const view = Array.from(this.views.values()).find(view => view.contains(event.target as Node))
-                    if (view === undefined) return
-                    this.sprite.removeFrame(view.frame)
+                    if (this.views.size === 1) {
+                        this.sprite.removeFrame(this.sprite.frames.get(0))
+                        this.viewContext.remove(this.sprite)
+                    } else {
+                        const view = Array.from(this.views.values()).find(view => view.contains(event.target as Node))
+                        if (view === undefined) return
+                        this.sprite.removeFrame(view.frame)
+                    }
                 }),
             )
         }))

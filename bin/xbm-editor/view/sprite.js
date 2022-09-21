@@ -78,10 +78,16 @@ export class SpriteView {
                 const original = this.sprite.getFrame(index).getData().slice(0);
                 this.sprite.insertFrame(index + 1).writeData(original);
             }), ListItem.default('Delete Frame').onTrigger(() => {
-                const view = Array.from(this.views.values()).find(view => view.contains(event.target));
-                if (view === undefined)
-                    return;
-                this.sprite.removeFrame(view.frame);
+                if (this.views.size === 1) {
+                    this.sprite.removeFrame(this.sprite.frames.get(0));
+                    this.viewContext.remove(this.sprite);
+                }
+                else {
+                    const view = Array.from(this.views.values()).find(view => view.contains(event.target));
+                    if (view === undefined)
+                        return;
+                    this.sprite.removeFrame(view.frame);
+                }
             }));
         }));
         this.terminator.with(Events.bind(this.title, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Rename Sprite...').onTrigger(() => __awaiter(this, void 0, void 0, function* () {
