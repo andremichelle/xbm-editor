@@ -19,6 +19,7 @@ export declare class SpriteView implements Terminable {
     readonly frameContainer: HTMLDivElement;
     readonly views: Map<xbm.Frame, FrameView>;
     constructor(viewContext: ViewContext, sprite: xbm.Sprite);
+    appendSpriteMenu(): void;
     appendChildren(parent: ParentNode): void;
     terminate(): void;
     private updateOrder;

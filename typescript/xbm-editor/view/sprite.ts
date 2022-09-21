@@ -92,17 +92,21 @@ export class SpriteView implements Terminable {
                     }
                 }),
             )
+            this.appendSpriteMenu()
         }))
-        this.terminator.with(Events.bind(this.title, 'contextmenu', (event: MouseEvent) =>
-            Menu.ContextMenu.append(
-                ListItem.default('Rename Sprite...').onTrigger(async () => {
-                    await Waiting.forFrames(2)
-                    const name = prompt('Enter new name', this.sprite.name.get())
-                    if (name === null) return
-                    this.sprite.name.set(name.trim().toLowerCase())
-                }),
-                ListItem.default('Delete Sprite').onTrigger(async () => this.viewContext.remove(this.sprite)),
-            )))
+        this.terminator.with(Events.bind(this.title, 'contextmenu', (event: MouseEvent) => this.appendSpriteMenu()))
+    }
+
+    appendSpriteMenu(): void {
+        Menu.ContextMenu.append(
+            ListItem.default('Rename Sprite...').onTrigger(async () => {
+                await Waiting.forFrames(2)
+                const name = prompt('Enter new name', this.sprite.name.get())
+                if (name === null) return
+                this.sprite.name.set(name.trim().toLowerCase())
+            }),
+            ListItem.default('Delete Sprite').onTrigger(async () => this.viewContext.remove(this.sprite)),
+        )
     }
 
     appendChildren(parent: ParentNode): void {

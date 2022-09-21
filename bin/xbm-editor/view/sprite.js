@@ -89,14 +89,18 @@ export class SpriteView {
                     this.sprite.removeFrame(view.frame);
                 }
             }));
+            this.appendSpriteMenu();
         }));
-        this.terminator.with(Events.bind(this.title, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Rename Sprite...').onTrigger(() => __awaiter(this, void 0, void 0, function* () {
+        this.terminator.with(Events.bind(this.title, 'contextmenu', (event) => this.appendSpriteMenu()));
+    }
+    appendSpriteMenu() {
+        Menu.ContextMenu.append(ListItem.default('Rename Sprite...').onTrigger(() => __awaiter(this, void 0, void 0, function* () {
             yield Waiting.forFrames(2);
             const name = prompt('Enter new name', this.sprite.name.get());
             if (name === null)
                 return;
             this.sprite.name.set(name.trim().toLowerCase());
-        })), ListItem.default('Delete Sprite').onTrigger(() => __awaiter(this, void 0, void 0, function* () { return this.viewContext.remove(this.sprite); })))));
+        })), ListItem.default('Delete Sprite').onTrigger(() => __awaiter(this, void 0, void 0, function* () { return this.viewContext.remove(this.sprite); })));
     }
     appendChildren(parent) {
         parent.appendChild(this.preview);
