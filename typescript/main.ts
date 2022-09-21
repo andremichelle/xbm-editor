@@ -11,9 +11,10 @@ import { xbm } from './xbm-editor/xbm.js'
 
     const boot = new Boot()
     boot.await('css', preloadImagesOfCssFile("./bin/main.css"))
+    boot.await('format', fetch('../xbm-sheet.json').then(x => x.json()))
     await boot.awaitCompletion()
 
-    const sheet = new xbm.Sheet([
+    const sheet = new xbm.Sheet([/*
         xbm.Sprite.fromData(8, 14, [
             [0x1F, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04],
             [0x0E, 0x04, 0x24, 0x56, 0x3E, 0xBE, 0x7E, 0x1C, 0x18, 0x10, 0x18, 0x08, 0x04, 0x04],
@@ -23,7 +24,8 @@ import { xbm } from './xbm-editor/xbm.js'
             [80, 0, 168, 0, 216, 0, 252, 1, 38, 3, 2, 2, 2, 2],
             [80, 0, 168, 0, 216, 0, 252, 1, 34, 2, 2, 2, 0, 0],
             [80, 0, 168, 0, 216, 0, 252, 1, 3, 6, 0, 0, 0, 0]
-        ], 'bat')])
+        ], 'bat')]
+    */]).deserialize(boot.get('format'))
 
     AnimationFrame.init()
     Menu.ContextMenu.init()

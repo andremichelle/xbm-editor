@@ -1,4 +1,14 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { ArrayUtils, ObservableCollection, ObservableImpl, ObservableValueImpl } from '../lib/common.js';
+import { HTML } from '../lib/dom.js';
 export var xbm;
 (function (xbm) {
     const writeHeader = (size, prefix) => `#define ${prefix}_width ${size.width}\n#define ${prefix}_height ${size.height}\n`;
@@ -28,6 +38,41 @@ export var xbm;
                 this.data.fill(0);
                 this.observable.notify(this);
             }
+        }
+        import() {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    const files = yield window.showOpenFilePicker({
+                        multiple: false, suggestedName: 'image.png',
+                        types: [{ accept: { 'image/*': ['.png'] }, description: '' }]
+                    });
+                    if (files.length !== 1)
+                        return;
+                    const file = yield files[0].getFile();
+                    const array = yield file.arrayBuffer();
+                    const image = new Image();
+                    image.onerror = reason => console.warn(reason);
+                    image.onload = () => {
+                        const canvas = HTML.create('canvas', { width: image.width, height: image.height });
+                        const context = canvas.getContext('2d');
+                        context.drawImage(image, 0, 0);
+                        const rgba = context.getImageData(0, 0, image.width, image.height).data;
+                        this.data.fill(0);
+                        for (let y = 0; y < image.height; y++) {
+                            for (let x = 0; x < image.width; x++) {
+                                if (rgba[(y * image.width + x) << 2] > 0) {
+                                    this.data[this.toByteIndex(x, y)] |= this.toBitMask(x);
+                                }
+                            }
+                        }
+                        this.observable.notify(this);
+                    };
+                    image.src = URL.createObjectURL(new Blob([array], { type: "image/png" }));
+                }
+                catch (e) {
+                    console.warn(e);
+                }
+            });
         }
         shift(dx, dy) {
             if (!this.data.some(x => x > 0))

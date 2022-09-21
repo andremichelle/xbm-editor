@@ -1,4 +1,5 @@
 import { ArrayUtils, Deserializer, Observable, ObservableCollection, ObservableImpl, ObservableValue, ObservableValueImpl, Observer, Serializer, Terminable } from '../lib/common.js'
+import { HTML } from '../lib/dom.js'
 
 export namespace xbm {
     const writeHeader = (size: Size, prefix: string): string =>
@@ -44,6 +45,38 @@ export namespace xbm {
                 this.data.fill(0)
                 this.observable.notify(this)
             }
+        }
+
+        async import(): Promise<void> {
+            try {
+                const files = await window.showOpenFilePicker({
+                    multiple: false, suggestedName: 'image.png',
+                    types: [{ accept: { 'image/*': ['.png'] }, description: '' }]
+                })
+                if (files.length !== 1) return
+                const file = await files[0].getFile()
+                const array = await file.arrayBuffer()
+                const image = new Image()
+                image.onerror = reason => console.warn(reason)
+                image.onload = () => {
+                    const canvas = HTML.create('canvas', { width: image.width, height: image.height })
+                    const context: CanvasRenderingContext2D = canvas.getContext('2d')!
+                    context.drawImage(image, 0, 0)
+                    const rgba = context.getImageData(0, 0, image.width, image.height).data
+                    this.data.fill(0)
+                    for (let y = 0; y < image.height; y++) {
+                        for (let x = 0; x < image.width; x++) {
+                            // we only check the red channel
+                            if (rgba[(y * image.width + x) << 2] > 0) {
+                                this.data[this.toByteIndex(x, y)] |= this.toBitMask(x)
+                            }
+                        }
+                    }
+                    this.observable.notify(this)
+                }
+                image.src = URL.createObjectURL(new Blob([array], { type: "image/png" }))
+
+            } catch (e) { console.warn(e) }
         }
 
         shift(dx: number, dy: number): void {

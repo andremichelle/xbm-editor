@@ -43,7 +43,7 @@ export class FrameView {
         this.terminator.with(this.frame.addObserver(this.paint));
         this.terminator.with(this.viewContext.zoom.addObserver(this.paint));
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel));
-        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)), ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)), ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)), ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)), ListItem.default('Clear').onTrigger(() => this.frame.clear()))));
+        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)), ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)), ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)), ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)), ListItem.default('Clear').onTrigger(() => this.frame.clear()), ListItem.default('Import').onTrigger(() => this.frame.import()))));
         this.element.appendChild(this.canvas);
         this.paint();
     }
