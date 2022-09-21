@@ -13,6 +13,7 @@ export class FrameView implements Terminable {
 
     constructor(readonly viewContext: ViewContext, readonly frame: xbm.Frame) {
         this.terminator.with(this.frame.addObserver(this.paint))
+        this.terminator.with(this.viewContext.zoom.addObserver(this.paint))
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel))
         this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event: MouseEvent) =>
             Menu.ContextMenu.append(

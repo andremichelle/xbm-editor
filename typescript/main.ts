@@ -28,7 +28,8 @@ import { xbm } from './xbm-editor/xbm.js'
     AnimationFrame.init()
     Menu.ContextMenu.init()
 
-    HTML.query('main').appendChild(new SheetView(sheet).element)
+    const sheetView = new SheetView(sheet)
+    HTML.query('main').appendChild(sheetView.element)
 
     const element = document.querySelector("nav#app-menu")!
     MenuBar.install()
@@ -61,9 +62,18 @@ import { xbm } from './xbm-editor/xbm.js'
                 }))
             .addListItem(ListItem.default("Clear", "", false).onTrigger(() => sheet.clear()))
         )
+        .addButton(HTML.query("[data-menu='view']", element), ListItem.root()
+            .addRuntimeChildrenCallback(parentItem => {
+                [6, 8, 16, 32].forEach(zoomLevel => {
+                    parentItem.addListItem(ListItem.default(`${zoomLevel}x`, '', sheetView.zoom.get() === zoomLevel)
+                        .onTrigger(() => sheetView.zoom.set(zoomLevel)))
+                })
+            })
+        )
         .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
             .addListItem(ListItem.default("Use the context-menu to edit sprites and frames", "", false)
-                .isSelectable(false)))
+                .isSelectable(false))
+        )
 
     // --- BOOT ENDS ---
 
