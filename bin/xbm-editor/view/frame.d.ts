@@ -11,5 +11,6 @@ export declare class FrameView implements Terminable {
     constructor(env: Env, frame: xbm.Frame);
     contains(target: Node | null): boolean;
     terminate(): void;
+    private readonly togglePixel;
     private readonly paint;
 }

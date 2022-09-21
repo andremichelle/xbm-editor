@@ -9,6 +9,13 @@ export class FrameView {
         this.element = HTML.create('div', { class: 'frame-view' });
         this.canvas = HTML.create('canvas');
         this.context = this.canvas.getContext('2d');
+        this.togglePixel = (event) => {
+            const r = this.canvas.getBoundingClientRect();
+            const z = this.env.zoom.get() | 0;
+            const x = Math.floor((event.clientX - r.left) / z) | 0;
+            const y = Math.floor((event.clientY - r.top) / z) | 0;
+            this.frame.togglePixel(x, y);
+        };
         this.paint = () => {
             const w = this.frame.size.width | 0;
             const h = this.frame.size.height | 0;
@@ -34,13 +41,7 @@ export class FrameView {
             }
         };
         this.terminator.with(this.frame.addObserver(this.paint));
-        this.terminator.with(Events.bind(this.canvas, 'pointerdown', (event) => {
-            const r = this.canvas.getBoundingClientRect();
-            const z = this.env.zoom.get() | 0;
-            const x = Math.floor((event.clientX - r.left) / z) | 0;
-            const y = Math.floor((event.clientY - r.top) / z) | 0;
-            frame.togglePixel(x, y);
-        }));
+        this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel));
         this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)), ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)), ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)), ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)), ListItem.default('Clear').onTrigger(() => this.frame.clear()))));
         this.element.appendChild(this.canvas);
         this.paint();

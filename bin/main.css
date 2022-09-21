@@ -314,12 +314,15 @@ main div.sheet-view > h1 {
   background-color: #111;
   -ms-writing-mode: tb-rl;
       writing-mode: vertical-rl;
-  rotate: 180deg;
+  transform: rotate(180deg) translate(100%, 0);
+  transform-origin: right center;
   border-radius: 0 8px 8px 0;
   border-top: 1px rgba(255, 255, 255, 0.1) solid;
   border-right: 1px rgba(255, 255, 255, 0.1) solid;
   border-bottom: 1px rgba(255, 255, 255, 0.1) solid;
   overflow: hidden;
+  pointer-events: all;
+  cursor: pointer;
 }
 main div.sheet-view > div.frame-views {
   min-height: 32px;

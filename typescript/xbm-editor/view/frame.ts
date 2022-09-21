@@ -13,13 +13,7 @@ export class FrameView implements Terminable {
 
     constructor(readonly env: Env, readonly frame: xbm.Frame) {
         this.terminator.with(this.frame.addObserver(this.paint))
-        this.terminator.with(Events.bind(this.canvas, 'pointerdown', (event: PointerEvent) => {
-            const r = this.canvas.getBoundingClientRect()
-            const z = this.env.zoom.get() | 0
-            const x = Math.floor((event.clientX - r.left) / z) | 0
-            const y = Math.floor((event.clientY - r.top) / z) | 0
-            frame.togglePixel(x, y)
-        }))
+        this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel))
         this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event: MouseEvent) =>
             Menu.ContextMenu.append(
                 ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)),
@@ -40,6 +34,14 @@ export class FrameView implements Terminable {
         this.canvas.remove()
         this.element.remove()
         this.terminator.terminate()
+    }
+
+    private readonly togglePixel = (event: PointerEvent) => {
+        const r = this.canvas.getBoundingClientRect()
+        const z = this.env.zoom.get() | 0
+        const x = Math.floor((event.clientX - r.left) / z) | 0
+        const y = Math.floor((event.clientY - r.top) / z) | 0
+        this.frame.togglePixel(x, y)
     }
 
     private readonly paint = (): void => {

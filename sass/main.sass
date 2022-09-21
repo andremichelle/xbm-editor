@@ -45,12 +45,15 @@ main
       color: rgba(white, 0.8)
       background-color: #111
       writing-mode: vertical-rl
-      rotate: 180deg
+      transform: rotate(180deg) translate(100%, 0)
+      transform-origin: right center
       border-radius: 0 8px 8px 0
       border-top: $OUTLINE
       border-right: $OUTLINE
       border-bottom: $OUTLINE
       overflow: hidden
+      pointer-events: all
+      cursor: pointer
     > div.frame-views
       min-height: 32px
       display: flex

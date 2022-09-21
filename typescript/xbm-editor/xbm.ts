@@ -1,5 +1,4 @@
-import { ArrayUtils, Observable, ObservableCollection, ObservableImpl, Observer, Serializer, Terminable } from '../lib/common.js'
-import { CollectionEvent } from './../lib/common'
+import { ArrayUtils, Observable, ObservableCollection, ObservableImpl, ObservableValue, ObservableValueImpl, Observer, Serializer, Terminable } from '../lib/common.js'
 
 export namespace xbm {
     const writeHeader = (size: Size, prefix: string): string =>
@@ -97,6 +96,7 @@ export namespace xbm {
 
         writeData(data: ReadonlyArray<number>): void {
             data.forEach((byte: number, index: number) => this.data[index] = byte)
+            this.observable.notify(this)
         }
 
         getData(): ReadonlyArray<number> {
@@ -134,7 +134,7 @@ export namespace xbm {
         data: number[][]
     }
 
-    export class Sprite implements Observable<CollectionEvent<Frame>>, Serializer<SpriteFormat>, Size {
+    export class Sprite implements Serializer<SpriteFormat>, Size {
         static single(width: number, height: number, name: string): Sprite {
             const sprite = new Sprite(width, height, name)
             sprite.insertFrame(0)
@@ -147,13 +147,11 @@ export namespace xbm {
             return sprite
         }
 
-        private readonly frames: ObservableCollection<Frame> = new ObservableCollection<Frame>()
+        readonly frames: ObservableCollection<Frame> = new ObservableCollection<Frame>()
+        readonly name: ObservableValue<string> = new ObservableValueImpl<string>('')
 
-        constructor(readonly width: number, readonly height: number, private name: string) {
-        }
-
-        addObserver(observer: Observer<CollectionEvent<Frame>>): Terminable {
-            return this.frames.addObserver(observer)
+        constructor(readonly width: number, readonly height: number, name: string) {
+            this.name.set(name.trim())
         }
 
         insertFrame(insertIndex: number = Number.MAX_SAFE_INTEGER): Frame {
@@ -171,17 +169,9 @@ export namespace xbm {
             return this.frames.get(index)
         }
 
-        getFrames(): ObservableCollection<Frame> {
-            return this.frames
-        }
-
-        getName(): string {
-            return this.name
-        }
-
         serialize(): SpriteFormat {
             return {
-                name: this.name,
+                name: this.name.get(),
                 width: this.width,
                 height: this.height,
                 data: this.frames.map(frame => frame.getData().slice())
@@ -190,9 +180,10 @@ export namespace xbm {
 
         toString(entriesEachLine: number = 8): string {
             if (this.isSingleFrame()) {
-                return this.frames.get(0).toString(this.name, entriesEachLine)
+                return this.frames.get(0).toString(this.name.get(), entriesEachLine)
             } else {
-                return `${writeHeader(this, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
+                const name = this.name.get()
+                return `${writeHeader(this, name)}static unsigned char ${name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`
             }
         }
 
@@ -209,6 +200,7 @@ export namespace xbm {
         }
 
         terminate(): void {
+            this.name.terminate()
             this.frames.terminate()
         }
     }

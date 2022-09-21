@@ -1,5 +1,4 @@
-import { Observable, ObservableCollection, Observer, Serializer, Terminable } from '../lib/common.js';
-import { CollectionEvent } from './../lib/common';
+import { Observable, ObservableCollection, ObservableValue, Observer, Serializer, Terminable } from '../lib/common.js';
 export declare namespace xbm {
     type FrameFormat = {
         data: ReadonlyArray<number>;
@@ -34,20 +33,17 @@ export declare namespace xbm {
         height: number;
         data: number[][];
     };
-    class Sprite implements Observable<CollectionEvent<Frame>>, Serializer<SpriteFormat>, Size {
+    class Sprite implements Serializer<SpriteFormat>, Size {
         readonly width: number;
         readonly height: number;
-        private name;
         static single(width: number, height: number, name: string): Sprite;
         static fromData(width: number, height: number, data: number[][], name: string): Sprite;
-        private readonly frames;
+        readonly frames: ObservableCollection<Frame>;
+        readonly name: ObservableValue<string>;
         constructor(width: number, height: number, name: string);
-        addObserver(observer: Observer<CollectionEvent<Frame>>): Terminable;
         insertFrame(insertIndex?: number): Frame;
         removeFrame(frame: Frame): void;
         getFrame(index: number): Frame;
-        getFrames(): ObservableCollection<Frame>;
-        getName(): string;
         serialize(): SpriteFormat;
         toString(entriesEachLine?: number): string;
         getFrameByteSize(): number;

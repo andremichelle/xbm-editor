@@ -1,4 +1,4 @@
-import { ArrayUtils, ObservableCollection, ObservableImpl } from '../lib/common.js';
+import { ArrayUtils, ObservableCollection, ObservableImpl, ObservableValueImpl } from '../lib/common.js';
 export var xbm;
 (function (xbm) {
     const writeHeader = (size, prefix) => `#define ${prefix}_width ${size.width}\n#define ${prefix}_height ${size.height}\n`;
@@ -77,6 +77,7 @@ export var xbm;
         }
         writeData(data) {
             data.forEach((byte, index) => this.data[index] = byte);
+            this.observable.notify(this);
         }
         getData() {
             return this.data;
@@ -106,8 +107,9 @@ export var xbm;
         constructor(width, height, name) {
             this.width = width;
             this.height = height;
-            this.name = name;
             this.frames = new ObservableCollection();
+            this.name = new ObservableValueImpl('');
+            this.name.set(name.trim());
         }
         static single(width, height, name) {
             const sprite = new Sprite(width, height, name);
@@ -118,9 +120,6 @@ export var xbm;
             const sprite = new Sprite(width, height, name);
             data.forEach(data => sprite.insertFrame().writeData(data));
             return sprite;
-        }
-        addObserver(observer) {
-            return this.frames.addObserver(observer);
         }
         insertFrame(insertIndex = Number.MAX_SAFE_INTEGER) {
             const frame = new Frame(this);
@@ -134,15 +133,9 @@ export var xbm;
         getFrame(index) {
             return this.frames.get(index);
         }
-        getFrames() {
-            return this.frames;
-        }
-        getName() {
-            return this.name;
-        }
         serialize() {
             return {
-                name: this.name,
+                name: this.name.get(),
                 width: this.width,
                 height: this.height,
                 data: this.frames.map(frame => frame.getData().slice())
@@ -150,10 +143,11 @@ export var xbm;
         }
         toString(entriesEachLine = 8) {
             if (this.isSingleFrame()) {
-                return this.frames.get(0).toString(this.name, entriesEachLine);
+                return this.frames.get(0).toString(this.name.get(), entriesEachLine);
             }
             else {
-                return `${writeHeader(this, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`;
+                const name = this.name.get();
+                return `${writeHeader(this, name)}static unsigned char ${name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`;
             }
         }
         getFrameByteSize() {
@@ -166,6 +160,7 @@ export var xbm;
             return 1 === this.getFrameCount();
         }
         terminate() {
+            this.name.terminate();
             this.frames.terminate();
         }
     }
