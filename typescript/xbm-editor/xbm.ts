@@ -67,7 +67,7 @@ export namespace xbm {
                     for (let y = 0; y < image.height; y++) {
                         for (let x = 0; x < image.width; x++) {
                             // we only check the red channel
-                            if (rgba[(y * image.width + x) << 2] > 0) {
+                            if (rgba[(y * image.width + x) << 2] > 0x7F) {
                                 this.data[this.toByteIndex(x, y)] |= this.toBitMask(x)
                             }
                         }
@@ -80,6 +80,20 @@ export namespace xbm {
         }
 
         shift(dx: number, dy: number): void {
+            const w = this.size.width
+            const h = this.size.height
+            this.translate((c: number, r: number) => [(c - dx + w) % w, (r - dy + h) % h])
+        }
+
+        mirrorHorizontal(): void {
+            this.translate((c: number, r: number) => [this.size.width - c - 1, r])
+        }
+
+        mirrorVertical(): void {
+            this.translate((c: number, r: number) => [c, this.size.height - r - 1])
+        }
+
+        translate(map: (c: number, r: number) => [number, number]): void {
             if (!this.data.some(x => x > 0)) return
             const w = this.size.width
             const h = this.size.height
@@ -92,8 +106,7 @@ export namespace xbm {
             this.data.fill(0)
             for (let r = 0; r < h; r++) {
                 for (let c = 0; c < w; c++) {
-                    const y = (r - dy + h) % h
-                    const x = (c - dx + w) % w
+                    const [x, y] = map(c, r)
                     if (pixels[y][x]) {
                         this.data[this.toByteIndex(c, r)] |= this.toBitMask(c)
                     }

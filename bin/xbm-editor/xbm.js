@@ -60,7 +60,7 @@ export var xbm;
                         this.data.fill(0);
                         for (let y = 0; y < image.height; y++) {
                             for (let x = 0; x < image.width; x++) {
-                                if (rgba[(y * image.width + x) << 2] > 0) {
+                                if (rgba[(y * image.width + x) << 2] > 0x7F) {
                                     this.data[this.toByteIndex(x, y)] |= this.toBitMask(x);
                                 }
                             }
@@ -75,6 +75,17 @@ export var xbm;
             });
         }
         shift(dx, dy) {
+            const w = this.size.width;
+            const h = this.size.height;
+            this.translate((c, r) => [(c - dx + w) % w, (r - dy + h) % h]);
+        }
+        mirrorHorizontal() {
+            this.translate((c, r) => [this.size.width - c - 1, r]);
+        }
+        mirrorVertical() {
+            this.translate((c, r) => [c, this.size.height - r - 1]);
+        }
+        translate(map) {
             if (!this.data.some(x => x > 0))
                 return;
             const w = this.size.width;
@@ -88,8 +99,7 @@ export var xbm;
             this.data.fill(0);
             for (let r = 0; r < h; r++) {
                 for (let c = 0; c < w; c++) {
-                    const y = (r - dy + h) % h;
-                    const x = (c - dx + w) % w;
+                    const [x, y] = map(c, r);
                     if (pixels[y][x]) {
                         this.data[this.toByteIndex(c, r)] |= this.toBitMask(c);
                     }

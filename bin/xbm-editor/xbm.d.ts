@@ -17,6 +17,9 @@ export declare namespace xbm {
         clear(): void;
         import(): Promise<void>;
         shift(dx: number, dy: number): void;
+        mirrorHorizontal(): void;
+        mirrorVertical(): void;
+        translate(map: (c: number, r: number) => [number, number]): void;
         setPixel(x: number, y: number, on: boolean): void;
         getPixel(x: number, y: number): boolean;
         serialize(): FrameFormat;

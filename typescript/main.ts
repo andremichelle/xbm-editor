@@ -78,7 +78,6 @@ import { xbm } from './xbm-editor/xbm.js'
         )
 
     // --- BOOT ENDS ---
-
     requestAnimationFrame(() => {
         document.querySelectorAll("body svg.preloader").forEach(element => element.remove())
         document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"))

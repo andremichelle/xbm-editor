@@ -21,9 +21,10 @@ export class FrameView implements Terminable {
                 ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)),
                 ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)),
                 ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)),
-                // TODO Mirror
-                ListItem.default('Clear').onTrigger(() => this.frame.clear()),
-                ListItem.default('Import').onTrigger(() => this.frame.import()),
+                ListItem.default('Mirror Vertical').onTrigger(() => this.frame.mirrorVertical()),
+                ListItem.default('Mirror Horizontal').onTrigger(() => this.frame.mirrorHorizontal()),
+                ListItem.default('Clear Pixels').onTrigger(() => this.frame.clear()),
+                ListItem.default('Import Image').onTrigger(() => this.frame.import()),
             )))
         this.element.appendChild(this.canvas)
         this.paint()
