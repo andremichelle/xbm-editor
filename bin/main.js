@@ -16,7 +16,7 @@ import { xbm } from './xbm-editor/xbm.js';
     console.debug("booting...");
     const boot = new Boot();
     boot.await('css', preloadImagesOfCssFile("./bin/main.css"));
-    boot.await('format', fetch('../xbm-sheet.json').then(x => x.json()));
+    boot.await('format', fetch('./xbm-sheet.json').then(x => x.json()));
     yield boot.awaitCompletion();
     const sheet = new xbm.Sheet([]).deserialize(boot.get('format'));
     AnimationFrame.init();
