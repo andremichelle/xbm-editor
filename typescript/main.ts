@@ -73,6 +73,9 @@ const showProgress = (() => {
                     fileStream.close()
                 }))
         )
+        .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
+            .addListItem(ListItem.default("Use the context-menu to edit sprites and frames", "", false)
+                .isSelectable(false)))
 
     // --- BOOT ENDS ---
 

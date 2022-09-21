@@ -32,7 +32,7 @@ export class SpriteView {
         this.title = HTML.create('h1', { textContent: this.sprite.name.get() });
         this.canvas = HTML.create('canvas');
         this.context = this.canvas.getContext('2d');
-        this.frames = HTML.create('div', { class: 'frame-views' });
+        this.frameContainer = HTML.create('div', { class: 'frame-views' });
         this.views = new Map();
         this.preview.appendChild(this.canvas);
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name));
@@ -66,16 +66,24 @@ export class SpriteView {
             this.canvas.height = sprite.height;
             this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context);
         }));
-        this.terminator.with(Events.bind(this.frames, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Copy Frame').onTrigger(() => {
-            const index = Array.from(this.views.values()).findIndex(view => view.contains(event.target));
-            const original = this.sprite.getFrame(index).getData().slice(0);
-            this.sprite.insertFrame(index + 1).writeData(original);
-        }), ListItem.default('Delete Frame').onTrigger(() => {
-            const view = Array.from(this.views.values()).find(view => view.contains(event.target));
-            if (view === undefined)
-                return;
-            this.sprite.removeFrame(view.frame);
-        }))));
+        this.terminator.with(Events.bind(this.frameContainer, 'contextmenu', (event) => {
+            const index = this.sprite.frames.map(frame => this.views.get(frame)).findIndex(view => view.contains(event.target));
+            Menu.ContextMenu.append(ListItem.default('Move Frame Left').onTrigger(() => {
+                this.sprite.frames.move(index, index - 1);
+            }).isSelectable(index > 0), ListItem.default('Move Frame Right').onTrigger(() => {
+                this.sprite.frames.move(index, index + 1);
+            }).isSelectable(index < this.sprite.getFrameCount() - 1), ListItem.default('Add Frame').onTrigger(() => {
+                this.sprite.insertFrame(index + 1);
+            }), ListItem.default('Copy Frame').onTrigger(() => {
+                const original = this.sprite.getFrame(index).getData().slice(0);
+                this.sprite.insertFrame(index + 1).writeData(original);
+            }), ListItem.default('Delete Frame').onTrigger(() => {
+                const view = Array.from(this.views.values()).find(view => view.contains(event.target));
+                if (view === undefined)
+                    return;
+                this.sprite.removeFrame(view.frame);
+            }));
+        }));
         this.terminator.with(Events.bind(this.title, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Rename').onTrigger(() => __awaiter(this, void 0, void 0, function* () {
             yield Waiting.forFrames(2);
             const name = prompt('Enter new name', this.sprite.name.get());
@@ -87,18 +95,18 @@ export class SpriteView {
     appendChildren(parent) {
         parent.appendChild(this.preview);
         parent.appendChild(this.title);
-        parent.appendChild(this.frames);
+        parent.appendChild(this.frameContainer);
     }
     terminate() {
         this.preview.remove();
         this.title.remove();
-        this.frames.remove();
+        this.frameContainer.remove();
         this.terminator.terminate();
     }
     updateOrder() {
-        while (this.frames.lastChild !== null)
-            this.frames.lastChild.remove();
-        this.sprite.frames.forEach(frame => this.frames.appendChild(this.views.get(frame).element));
+        while (this.frameContainer.lastChild !== null)
+            this.frameContainer.lastChild.remove();
+        this.sprite.frames.forEach(frame => this.frameContainer.appendChild(this.views.get(frame).element));
     }
 }
 //# sourceMappingURL=sprite.js.map

@@ -74,7 +74,10 @@ const showProgress = (() => {
         const fileStream = yield handler.createWritable();
         fileStream.write(new Blob([sheet.toString()]));
         fileStream.close();
-    }))));
+    }))))
+        .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
+        .addListItem(ListItem.default("Use the context-menu to edit sprites and frames", "", false)
+        .isSelectable(false)));
     document.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
     document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false });
     const resize = () => document.body.style.height = `${window.innerHeight}px`;

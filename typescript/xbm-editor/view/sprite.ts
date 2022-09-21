@@ -23,7 +23,7 @@ export class SpriteView implements Terminable {
     readonly title: HTMLHeadingElement = HTML.create('h1', { textContent: this.sprite.name.get() })
     readonly canvas: HTMLCanvasElement = HTML.create('canvas')
     readonly context: CanvasRenderingContext2D = this.canvas.getContext('2d')!
-    readonly frames: HTMLDivElement = HTML.create('div', { class: 'frame-views' })
+    readonly frameContainer: HTMLDivElement = HTML.create('div', { class: 'frame-views' })
     readonly views: Map<xbm.Frame, FrameView> = new Map<xbm.Frame, FrameView>()
 
     constructor(readonly env: Env, readonly sprite: xbm.Sprite) {
@@ -62,10 +62,21 @@ export class SpriteView implements Terminable {
             this.canvas.height = sprite.height
             this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context)
         }))
-        this.terminator.with(Events.bind(this.frames, 'contextmenu', (event: MouseEvent) =>
+        this.terminator.with(Events.bind(this.frameContainer, 'contextmenu', (event: MouseEvent) => {
+            const index = this.sprite.frames.map(frame => this.views.get(frame)!).findIndex(view => view.contains(event.target as Node))
             Menu.ContextMenu.append(
+                ListItem.default('Move Frame Left').onTrigger(() => {
+                    this.sprite.frames.move(index, index - 1)
+
+                }).isSelectable(index > 0),
+                ListItem.default('Move Frame Right').onTrigger(() => {
+                    this.sprite.frames.move(index, index + 1)
+
+                }).isSelectable(index < this.sprite.getFrameCount() - 1),
+                ListItem.default('Add Frame').onTrigger(() => {
+                    this.sprite.insertFrame(index + 1)
+                }),
                 ListItem.default('Copy Frame').onTrigger(() => {
-                    const index = Array.from(this.views.values()).findIndex(view => view.contains(event.target as Node))
                     const original = this.sprite.getFrame(index).getData().slice(0)
                     this.sprite.insertFrame(index + 1).writeData(original)
 
@@ -74,8 +85,9 @@ export class SpriteView implements Terminable {
                     const view = Array.from(this.views.values()).find(view => view.contains(event.target as Node))
                     if (view === undefined) return
                     this.sprite.removeFrame(view.frame)
-                })
-            )))
+                }),
+            )
+        }))
         this.terminator.with(Events.bind(this.title, 'contextmenu', (event: MouseEvent) =>
             Menu.ContextMenu.append(
                 ListItem.default('Rename').onTrigger(async () => {
@@ -90,18 +102,18 @@ export class SpriteView implements Terminable {
     appendChildren(parent: ParentNode): void {
         parent.appendChild(this.preview)
         parent.appendChild(this.title)
-        parent.appendChild(this.frames)
+        parent.appendChild(this.frameContainer)
     }
 
     terminate(): void {
         this.preview.remove()
         this.title.remove()
-        this.frames.remove()
+        this.frameContainer.remove()
         this.terminator.terminate()
     }
 
     private updateOrder(): void {
-        while (this.frames.lastChild !== null) this.frames.lastChild.remove()
-        this.sprite.frames.forEach(frame => this.frames.appendChild(this.views.get(frame)!.element))
+        while (this.frameContainer.lastChild !== null) this.frameContainer.lastChild.remove()
+        this.sprite.frames.forEach(frame => this.frameContainer.appendChild(this.views.get(frame)!.element))
     }
 }
