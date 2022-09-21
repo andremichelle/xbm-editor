@@ -1,3 +1,4 @@
+import { ArrayUtils } from './common.js';
 export class ListItemDefaultData {
     constructor(label, shortcut = "", checked = false) {
         this.label = label;
@@ -153,6 +154,44 @@ class Controller {
             menu = menu.childMenu;
         } while (menu !== null);
         return false;
+    }
+}
+class ContextMenu {
+    constructor() {
+        this.collection = [];
+    }
+    init() {
+        document.addEventListener('pointerdown', (event) => {
+            if (event.ctrlKey)
+                event.stopImmediatePropagation();
+        }, { capture: true });
+        document.addEventListener('contextmenu', () => {
+            if (this.collection.length > 0) {
+                Menu.Controller.close();
+            }
+            ArrayUtils.clear(this.collection);
+        }, { capture: true });
+        document.addEventListener('contextmenu', (event) => {
+            if (this.collection.length > 0) {
+                event.preventDefault();
+                let separatorBefore = false;
+                const rootItem = ListItem.root();
+                this.collection.reverse().forEach((block) => {
+                    block.forEach((listItem) => {
+                        if (separatorBefore) {
+                            separatorBefore = false;
+                            listItem.addSeparatorBefore();
+                        }
+                        rootItem.addListItem(listItem);
+                    });
+                    separatorBefore = true;
+                });
+                Menu.Controller.open(rootItem, event.clientX, event.clientY, false);
+            }
+        }, { capture: false });
+    }
+    append(...listItems) {
+        this.collection.push(listItems);
     }
 }
 export class Menu {
@@ -355,6 +394,7 @@ export class Menu {
     }
 }
 Menu.Controller = new Controller();
+Menu.ContextMenu = new ContextMenu();
 Menu.Renderer = new Map();
 Menu.Renderer.set(ListItemDefaultData, (element, data) => {
     element.classList.add("default");

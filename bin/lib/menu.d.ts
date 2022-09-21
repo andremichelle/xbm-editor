@@ -43,9 +43,16 @@ declare class Controller {
     iterateAll(callback: (menu: Menu) => void): void;
     reduceAll(callback: (menu: Menu) => boolean): boolean;
 }
+declare class ContextMenu {
+    private readonly collection;
+    constructor();
+    init(): void;
+    append(...listItems: ListItem[]): void;
+}
 export declare class Menu {
     private readonly listItem;
     static Controller: Controller;
+    static ContextMenu: ContextMenu;
     static Renderer: Map<any, (element: HTMLElement, data: any) => void>;
     readonly element: HTMLElement;
     childMenu: Menu | null;

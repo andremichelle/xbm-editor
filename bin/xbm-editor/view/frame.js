@@ -41,14 +41,12 @@ export class FrameView {
             const y = Math.floor((event.clientY - r.top) / z) | 0;
             frame.togglePixel(x, y);
         }));
-        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => {
-            event.preventDefault();
-            Menu.Controller.open(ListItem.root()
-                .addListItem(ListItem.default('Clear')
-                .onTrigger(() => this.frame.clear())), event.clientX, event.clientY, false);
-        }));
+        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)), ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)), ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)), ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)), ListItem.default('Clear').onTrigger(() => this.frame.clear()))));
         this.element.appendChild(this.canvas);
         this.paint();
+    }
+    contains(target) {
+        return this.element.contains(target);
     }
     terminate() {
         this.canvas.remove();

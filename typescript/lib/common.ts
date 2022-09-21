@@ -186,6 +186,11 @@ export class ArrayUtils {
         return array
     }
 
+    static clear<T>(array: T[]): T[] {
+        array.splice(0, array.length)
+        return array
+    }
+
     static shuffle<T>(array: T[], random: Random) {
         for (let i = 0; i < array.length; i++) {
             const element = array[i]

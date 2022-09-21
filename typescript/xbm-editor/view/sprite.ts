@@ -1,6 +1,7 @@
 import { AnimationFrame, HTML } from "../../lib/dom.js"
+import { Menu, ListItem } from "../../lib/menu.js"
 import { xbm } from "../xbm.js"
-import { Terminable, Terminator } from './../../lib/common.js'
+import { Events, Terminable, Terminator } from './../../lib/common.js'
 import { Env } from "./env.js"
 import { FrameView } from "./frame.js"
 
@@ -28,16 +29,22 @@ export class SpriteView implements Terminable {
     constructor(readonly env: Env, readonly sprite: xbm.Sprite) {
         this.preview.appendChild(this.canvas)
 
-        this.terminator.with(this.sprite.addObserver(sprite => { })) // TODO
+        this.terminator.with(this.sprite.addObserver(sprite => console.log('sprite changed'))) // TODO
 
         this.sprite.getFrames().forEach(frame => this.addFrame(frame))
 
-        let frame = 0 // Move to single source with adjustable speed
+        let frame = 0 // Increment in single source with adjustable speed
         this.terminator.with(AnimationFrame.add(() => {
             this.canvas.width = sprite.width
             this.canvas.height = sprite.height
             this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context)
         }))
+        this.terminator.with(Events.bind(this.frames, 'contextmenu', (event: MouseEvent) =>
+            Menu.ContextMenu.append(ListItem.default('Remove Frame').onTrigger(() => {
+                const view = Array.from(this.views.values()).find(view => view.contains(event.target as Node))
+                if (view === undefined) return
+                this.sprite.removeFrame(view.frame)
+            }))))
     }
 
     addFrame(frame: xbm.Frame): void {

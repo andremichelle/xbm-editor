@@ -29,6 +29,29 @@ export var xbm;
                 this.observable.notify(this);
             }
         }
+        shift(dx, dy) {
+            if (!this.data.some(x => x > 0))
+                return;
+            const w = this.size.width;
+            const h = this.size.height;
+            const pixels = ArrayUtils.fill(h, () => ArrayUtils.fill(w, () => false));
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    pixels[y][x] = this.getPixel(x, y);
+                }
+            }
+            this.data.fill(0);
+            for (let r = 0; r < h; r++) {
+                for (let c = 0; c < w; c++) {
+                    const y = (r - dy + h) % h;
+                    const x = (c - dx + w) % w;
+                    if (pixels[y][x]) {
+                        this.data[this.toByteIndex(c, r)] |= this.toBitMask(c);
+                    }
+                }
+            }
+            this.observable.notify(this);
+        }
         setPixel(x, y, on) {
             const old = this.data[this.toByteIndex(x, y)];
             let value = old;

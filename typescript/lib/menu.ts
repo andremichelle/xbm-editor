@@ -1,3 +1,5 @@
+import { ArrayUtils, Option, Options } from './common.js'
+
 export class ListItemDefaultData {
     constructor(readonly label: string,
         readonly shortcut: string = "",
@@ -123,7 +125,7 @@ class Controller {
         }
     }
 
-    open(listItem: ListItem, x: number, y: number, docked: boolean, onClose: () => void = () => {}) {
+    open(listItem: ListItem, x: number, y: number, docked: boolean, onClose: () => void = () => { }) {
         if (null === this.layer) {
             this.layer = document.createElement("div")
             this.layer.classList.add("menu-layer")
@@ -179,8 +181,50 @@ class Controller {
     }
 }
 
+class ContextMenu {
+    private readonly collection: ListItem[][] = []
+
+    constructor() {
+    }
+
+    init(): void {
+        document.addEventListener('pointerdown', (event: PointerEvent) => {
+            if (event.ctrlKey) event.stopImmediatePropagation()
+        }, { capture: true })
+        document.addEventListener('contextmenu', () => {
+            if (this.collection.length > 0) {
+                Menu.Controller.close()
+            }
+            ArrayUtils.clear(this.collection)
+        }, { capture: true })
+        document.addEventListener('contextmenu', (event: MouseEvent) => {
+            if (this.collection.length > 0) {
+                event.preventDefault()
+                let separatorBefore = false
+                const rootItem = ListItem.root()
+                this.collection.reverse().forEach((block: ListItem[]) => {
+                    block.forEach((listItem: ListItem) => {
+                        if (separatorBefore) {
+                            separatorBefore = false
+                            listItem.addSeparatorBefore()
+                        }
+                        rootItem.addListItem(listItem)
+                    })
+                    separatorBefore = true
+                })
+                Menu.Controller.open(rootItem, event.clientX, event.clientY, false)
+            }
+        }, { capture: false })
+    }
+
+    append(...listItems: ListItem[]): void {
+        this.collection.push(listItems)
+    }
+}
+
 export class Menu {
     static Controller: Controller = new Controller()
+    static ContextMenu: ContextMenu = new ContextMenu()
     static Renderer: Map<any, (element: HTMLElement, data: any) => void> = new Map()
 
     readonly element: HTMLElement = document.createElement("nav")

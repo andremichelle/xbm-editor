@@ -9,6 +9,7 @@ export declare class FrameView implements Terminable {
     readonly canvas: HTMLCanvasElement;
     readonly context: CanvasRenderingContext2D;
     constructor(env: Env, frame: xbm.Frame);
+    contains(target: Node | null): boolean;
     terminate(): void;
     private readonly paint;
 }

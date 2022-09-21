@@ -38,6 +38,7 @@ const showProgress = (() => {
         ], 'bat')
     ]);
     AnimationFrame.init();
+    Menu.ContextMenu.init();
     HTML.query('main').appendChild(new SheetView(new Env(), sheet).element);
     const element = document.querySelector("nav#app-menu");
     MenuBar.install()
@@ -75,11 +76,6 @@ const showProgress = (() => {
         fileStream.close();
     }))));
     document.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-    document.addEventListener('pointerdown', (event) => {
-        if (event.ctrlKey)
-            event.stopImmediatePropagation();
-    }, { capture: true });
-    document.addEventListener('contextmenu', () => Menu.Controller.close(), { capture: true });
     document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false });
     const resize = () => document.body.style.height = `${window.innerHeight}px`;
     window.addEventListener("resize", resize);

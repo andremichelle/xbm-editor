@@ -132,6 +132,10 @@ export class ArrayUtils {
         }
         return array;
     }
+    static clear(array) {
+        array.splice(0, array.length);
+        return array;
+    }
     static shuffle(array, random) {
         for (let i = 0; i < array.length; i++) {
             const element = array[i];

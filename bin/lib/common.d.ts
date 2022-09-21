@@ -79,6 +79,7 @@ export declare class ObservableValueImpl<T> implements ObservableValue<T> {
 }
 export declare class ArrayUtils {
     static fill<T>(n: number, factory: (index: number) => T): T[];
+    static clear<T>(array: T[]): T[];
     static shuffle<T>(array: T[], random: Random): void;
     static binarySearch: <T>(array: ArrayLike<any> | T[], key: number) => number;
     private constructor();

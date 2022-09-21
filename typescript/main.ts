@@ -35,6 +35,7 @@ const showProgress = (() => {
         ], 'bat')])
 
     AnimationFrame.init()
+    Menu.ContextMenu.init()
 
     HTML.query('main').appendChild(new SheetView(new Env(), sheet).element)
 
@@ -77,10 +78,6 @@ const showProgress = (() => {
 
     // prevent dragging entire document on mobile
     document.addEventListener('touchmove', (event: TouchEvent) => event.preventDefault(), { passive: false })
-    document.addEventListener('pointerdown', (event: PointerEvent) => {
-        if (event.ctrlKey) event.stopImmediatePropagation()
-    }, { capture: true })
-    document.addEventListener('contextmenu', () => Menu.Controller.close(), { capture: true })
     document.addEventListener('dblclick', (event: Event) => event.preventDefault(), { passive: false })
     const resize = () => document.body.style.height = `${window.innerHeight}px`
     window.addEventListener("resize", resize)

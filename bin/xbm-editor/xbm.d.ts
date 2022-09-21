@@ -15,6 +15,7 @@ export declare namespace xbm {
         addObserver(observer: Observer<Frame>): Terminable;
         togglePixel(x: number, y: number): void;
         clear(): void;
+        shift(dx: number, dy: number): void;
         setPixel(x: number, y: number, on: boolean): void;
         getPixel(x: number, y: number): boolean;
         serialize(): FrameFormat;

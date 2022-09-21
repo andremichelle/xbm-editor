@@ -1,5 +1,6 @@
 import { AnimationFrame, HTML } from "../../lib/dom.js";
-import { Terminator } from './../../lib/common.js';
+import { Menu, ListItem } from "../../lib/menu.js";
+import { Events, Terminator } from './../../lib/common.js';
 import { FrameView } from "./frame.js";
 export class Animation {
     constructor(map) {
@@ -25,7 +26,7 @@ export class SpriteView {
         this.frames = HTML.create('div', { class: 'frame-views' });
         this.views = new Map();
         this.preview.appendChild(this.canvas);
-        this.terminator.with(this.sprite.addObserver(sprite => { }));
+        this.terminator.with(this.sprite.addObserver(sprite => console.log('sprite changed')));
         this.sprite.getFrames().forEach(frame => this.addFrame(frame));
         let frame = 0;
         this.terminator.with(AnimationFrame.add(() => {
@@ -33,6 +34,12 @@ export class SpriteView {
             this.canvas.height = sprite.height;
             this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context);
         }));
+        this.terminator.with(Events.bind(this.frames, 'contextmenu', (event) => Menu.ContextMenu.append(ListItem.default('Remove Frame').onTrigger(() => {
+            const view = Array.from(this.views.values()).find(view => view.contains(event.target));
+            if (view === undefined)
+                return;
+            this.sprite.removeFrame(view.frame);
+        }))));
     }
     addFrame(frame) {
         const view = new FrameView(this.env, frame);
