@@ -120,6 +120,143 @@ export class ObservableImpl<T> implements Observable<T> {
     }
 }
 
+export enum CollectionEventType {
+    Add, Remove, Order
+}
+
+export class CollectionEvent<T> {
+    constructor(readonly collection: ObservableCollection<T>,
+        readonly type: CollectionEventType,
+        readonly item: T | null = null,
+        readonly index: number = -1) {
+    }
+}
+
+export class ObservableCollection<T> implements Observable<CollectionEvent<T>> {
+    static observeNested<U extends Observable<U>>(collection: ObservableCollection<U>,
+        observer: (collection: ObservableCollection<U>) => void): Terminable {
+        const itemObserver = () => observer(collection)
+        const observers: Map<U, Terminable> = new Map()
+        collection.forEach((observable: U) => observers.set(observable, observable.addObserver(itemObserver)))
+        collection.addObserver((event: CollectionEvent<U>) => {
+            if (event.type === CollectionEventType.Add) {
+                observers.set(event.item!, event.item!.addObserver(itemObserver))
+            } else if (event.type === CollectionEventType.Remove) {
+                const observer = observers.get(event.item!)!
+                console.assert(observer !== undefined)
+                observers.delete(event.item!)
+                observer.terminate()
+            } else if (event.type === CollectionEventType.Order) {
+                // ... nothing
+            }
+            observer(collection)
+        })
+        return {
+            terminate() {
+                observers.forEach((value: Terminable) => value.terminate())
+                observers.clear()
+            }
+        }
+    }
+
+
+    private readonly observable = new ObservableImpl<CollectionEvent<T>>()
+
+    private readonly items: T[] = []
+
+    add(value: T, index: number = Number.MAX_SAFE_INTEGER): boolean {
+        console.assert(0 <= index)
+        index = Math.min(index, this.items.length)
+        if (this.items.includes(value)) return false
+        this.items.splice(index, 0, value)
+        this.observable.notify(new CollectionEvent(this, CollectionEventType.Add, value, index))
+        return true
+    }
+
+    addAll(values: T[]): void {
+        for (const value of values) {
+            this.add(value)
+        }
+    }
+
+    remove(value: T): boolean {
+        return this.removeIndex(this.items.indexOf(value))
+    }
+
+    removeIndex(index: number) {
+        if (-1 === index) return false
+        const removed: T[] = this.items.splice(index, 1)
+        if (0 === removed.length) return false
+        this.observable.notify(new CollectionEvent(this, CollectionEventType.Remove, removed[0], index))
+        return true
+    }
+
+    clear() {
+        for (let index = this.items.length - 1; index > -1; index--) {
+            this.removeIndex(index)
+        }
+    }
+
+    get(index: number): T {
+        return this.items[index]
+    }
+
+    first(): Option<T> {
+        return 0 < this.items.length ? Options.valueOf(this.items[0]) : Options.None
+    }
+
+    indexOf(value: T): number {
+        return this.items.indexOf(value)
+    }
+
+    size(): number {
+        return this.items.length
+    }
+
+    map<U>(fn: (value: T, index: number, array: T[]) => U): U[] {
+        const arr: U[] = []
+        for (let i = 0; i < this.items.length; i++) {
+            arr[i] = fn(this.items[i], i, this.items)
+        }
+        return arr
+    }
+
+    forEach(fn: (item: T, index: number) => void): void {
+        for (let i = 0; i < this.items.length; i++) {
+            fn(this.items[i], i)
+        }
+    }
+
+    move(fromIndex: number, toIndex: number) {
+        if (fromIndex === toIndex) return
+        console.assert(0 <= toIndex && toIndex < this.size())
+        console.assert(0 <= fromIndex && fromIndex < this.size())
+        this.items.splice(toIndex, 0, this.items.splice(fromIndex, 1)[0])
+        this.observable.notify(new CollectionEvent<T>(this, CollectionEventType.Order))
+    }
+
+    reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U {
+        let value: U = initialValue
+        for (let i = 0; i < this.items.length; i++) {
+            value = fn(value, this.items[i], i)
+        }
+        return value
+    }
+
+    addObserver(observer: Observer<CollectionEvent<T>>, notify: boolean = false): Terminable {
+        if (notify) this.forEach((item: T, index: number) => observer(new CollectionEvent<T>(this, CollectionEventType.Add, item, index)))
+        return this.observable.addObserver(observer)
+    }
+
+    removeObserver(observer: Observer<CollectionEvent<T>>): boolean {
+        return this.observable.removeObserver(observer)
+    }
+
+    terminate(): void {
+        this.observable.terminate()
+    }
+}
+
 export interface Serializer<T> {
     serialize(): T
 }

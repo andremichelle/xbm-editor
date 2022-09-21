@@ -88,6 +88,132 @@ export class ObservableImpl {
         this.observers.splice(0, this.observers.length);
     }
 }
+export var CollectionEventType;
+(function (CollectionEventType) {
+    CollectionEventType[CollectionEventType["Add"] = 0] = "Add";
+    CollectionEventType[CollectionEventType["Remove"] = 1] = "Remove";
+    CollectionEventType[CollectionEventType["Order"] = 2] = "Order";
+})(CollectionEventType || (CollectionEventType = {}));
+export class CollectionEvent {
+    constructor(collection, type, item = null, index = -1) {
+        this.collection = collection;
+        this.type = type;
+        this.item = item;
+        this.index = index;
+    }
+}
+export class ObservableCollection {
+    constructor() {
+        this.observable = new ObservableImpl();
+        this.items = [];
+    }
+    static observeNested(collection, observer) {
+        const itemObserver = () => observer(collection);
+        const observers = new Map();
+        collection.forEach((observable) => observers.set(observable, observable.addObserver(itemObserver)));
+        collection.addObserver((event) => {
+            if (event.type === CollectionEventType.Add) {
+                observers.set(event.item, event.item.addObserver(itemObserver));
+            }
+            else if (event.type === CollectionEventType.Remove) {
+                const observer = observers.get(event.item);
+                console.assert(observer !== undefined);
+                observers.delete(event.item);
+                observer.terminate();
+            }
+            else if (event.type === CollectionEventType.Order) {
+            }
+            observer(collection);
+        });
+        return {
+            terminate() {
+                observers.forEach((value) => value.terminate());
+                observers.clear();
+            }
+        };
+    }
+    add(value, index = Number.MAX_SAFE_INTEGER) {
+        console.assert(0 <= index);
+        index = Math.min(index, this.items.length);
+        if (this.items.includes(value))
+            return false;
+        this.items.splice(index, 0, value);
+        this.observable.notify(new CollectionEvent(this, CollectionEventType.Add, value, index));
+        return true;
+    }
+    addAll(values) {
+        for (const value of values) {
+            this.add(value);
+        }
+    }
+    remove(value) {
+        return this.removeIndex(this.items.indexOf(value));
+    }
+    removeIndex(index) {
+        if (-1 === index)
+            return false;
+        const removed = this.items.splice(index, 1);
+        if (0 === removed.length)
+            return false;
+        this.observable.notify(new CollectionEvent(this, CollectionEventType.Remove, removed[0], index));
+        return true;
+    }
+    clear() {
+        for (let index = this.items.length - 1; index > -1; index--) {
+            this.removeIndex(index);
+        }
+    }
+    get(index) {
+        return this.items[index];
+    }
+    first() {
+        return 0 < this.items.length ? Options.valueOf(this.items[0]) : Options.None;
+    }
+    indexOf(value) {
+        return this.items.indexOf(value);
+    }
+    size() {
+        return this.items.length;
+    }
+    map(fn) {
+        const arr = [];
+        for (let i = 0; i < this.items.length; i++) {
+            arr[i] = fn(this.items[i], i, this.items);
+        }
+        return arr;
+    }
+    forEach(fn) {
+        for (let i = 0; i < this.items.length; i++) {
+            fn(this.items[i], i);
+        }
+    }
+    move(fromIndex, toIndex) {
+        if (fromIndex === toIndex)
+            return;
+        console.assert(0 <= toIndex && toIndex < this.size());
+        console.assert(0 <= fromIndex && fromIndex < this.size());
+        this.items.splice(toIndex, 0, this.items.splice(fromIndex, 1)[0]);
+        this.observable.notify(new CollectionEvent(this, CollectionEventType.Order));
+    }
+    reduce(fn, initialValue) {
+        let value = initialValue;
+        for (let i = 0; i < this.items.length; i++) {
+            value = fn(value, this.items[i], i);
+        }
+        return value;
+    }
+    addObserver(observer, notify = false) {
+        if (notify)
+            this.forEach((item, index) => observer(new CollectionEvent(this, CollectionEventType.Add, item, index)));
+        return this.observable.addObserver(observer);
+    }
+    removeObserver(observer) {
+        return this.observable.removeObserver(observer);
+    }
+    terminate() {
+        this.observable.terminate();
+    }
+}
 export const ObservableValueVoid = {
     addObserver: (_) => TerminableVoid,
     get: () => null,

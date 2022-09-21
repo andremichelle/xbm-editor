@@ -1,4 +1,4 @@
-import { ArrayUtils, ObservableImpl } from '../lib/common.js';
+import { ArrayUtils, ObservableCollection, ObservableImpl } from '../lib/common.js';
 export var xbm;
 (function (xbm) {
     const writeHeader = (size, prefix) => `#define ${prefix}_width ${size.width}\n#define ${prefix}_height ${size.height}\n`;
@@ -107,8 +107,7 @@ export var xbm;
             this.width = width;
             this.height = height;
             this.name = name;
-            this.observable = new ObservableImpl();
-            this.frames = [];
+            this.frames = new ObservableCollection();
         }
         static single(width, height, name) {
             const sprite = new Sprite(width, height, name);
@@ -121,23 +120,19 @@ export var xbm;
             return sprite;
         }
         addObserver(observer) {
-            return this.observable.addObserver(observer);
+            return this.frames.addObserver(observer);
         }
         insertFrame(insertIndex = Number.MAX_SAFE_INTEGER) {
             const frame = new Frame(this);
-            this.frames.splice(insertIndex, 0, frame);
-            this.observable.notify(this);
+            this.frames.add(frame, insertIndex);
             return frame;
         }
         removeFrame(frame) {
-            const index = this.frames.indexOf(frame);
-            console.assert(index !== -1);
-            this.frames.splice(index, 1);
+            this.frames.remove(frame);
             frame.terminate();
-            this.observable.notify(this);
         }
         getFrame(index) {
-            return this.frames[index];
+            return this.frames.get(index);
         }
         getFrames() {
             return this.frames;
@@ -155,7 +150,7 @@ export var xbm;
         }
         toString(entriesEachLine = 8) {
             if (this.isSingleFrame()) {
-                return this.frames[0].toString(this.name, entriesEachLine);
+                return this.frames.get(0).toString(this.name, entriesEachLine);
             }
             else {
                 return `${writeHeader(this, this.name)}static unsigned char ${this.name}_xbm[${this.getFrameCount()}][${this.getFrameByteSize()}] PROGMEM = {${this.frames.map(frame => `\n\t{\n${writeDataBlock(frame.getData(), '\t\t', entriesEachLine)}\n\t}`).join(',')}\n};`;
@@ -165,13 +160,13 @@ export var xbm;
             return getFrameByteSize(this);
         }
         getFrameCount() {
-            return this.frames.length;
+            return this.frames.size();
         }
         isSingleFrame() {
             return 1 === this.getFrameCount();
         }
         terminate() {
-            this.observable.terminate();
+            this.frames.terminate();
         }
     }
     xbm.Sprite = Sprite;

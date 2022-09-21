@@ -54,6 +54,39 @@ export declare class ObservableImpl<T> implements Observable<T> {
     removeObserver(observer: Observer<T>): boolean;
     terminate(): void;
 }
+export declare enum CollectionEventType {
+    Add = 0,
+    Remove = 1,
+    Order = 2
+}
+export declare class CollectionEvent<T> {
+    readonly collection: ObservableCollection<T>;
+    readonly type: CollectionEventType;
+    readonly item: T | null;
+    readonly index: number;
+    constructor(collection: ObservableCollection<T>, type: CollectionEventType, item?: T | null, index?: number);
+}
+export declare class ObservableCollection<T> implements Observable<CollectionEvent<T>> {
+    static observeNested<U extends Observable<U>>(collection: ObservableCollection<U>, observer: (collection: ObservableCollection<U>) => void): Terminable;
+    private readonly observable;
+    private readonly items;
+    add(value: T, index?: number): boolean;
+    addAll(values: T[]): void;
+    remove(value: T): boolean;
+    removeIndex(index: number): boolean;
+    clear(): void;
+    get(index: number): T;
+    first(): Option<T>;
+    indexOf(value: T): number;
+    size(): number;
+    map<U>(fn: (value: T, index: number, array: T[]) => U): U[];
+    forEach(fn: (item: T, index: number) => void): void;
+    move(fromIndex: number, toIndex: number): void;
+    reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
+    addObserver(observer: Observer<CollectionEvent<T>>, notify?: boolean): Terminable;
+    removeObserver(observer: Observer<CollectionEvent<T>>): boolean;
+    terminate(): void;
+}
 export interface Serializer<T> {
     serialize(): T;
 }
