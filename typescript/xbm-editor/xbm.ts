@@ -1,4 +1,4 @@
-import { ArrayUtils, Observable, ObservableCollection, ObservableImpl, ObservableValue, ObservableValueImpl, Observer, Serializer, Terminable } from '../lib/common.js'
+import { ArrayUtils, Deserializer, Observable, ObservableCollection, ObservableImpl, ObservableValue, ObservableValueImpl, Observer, Serializer, Terminable } from '../lib/common.js'
 
 export namespace xbm {
     const writeHeader = (size: Size, prefix: string): string =>
@@ -207,11 +207,25 @@ export namespace xbm {
 
     export type SheetFormat = { sprites: SpriteFormat[] }
 
-    export class Sheet implements Serializer<SheetFormat> {
-        constructor(readonly sprites: Sprite[]) { }
+    export class Sheet implements Serializer<SheetFormat>, Deserializer<SheetFormat> {
+        readonly sprites: ObservableCollection<Sprite> = new ObservableCollection<Sprite>()
+
+        constructor(sprites: Sprite[]) {
+            this.sprites.addAll(sprites)
+        }
+
+        clear(): void {
+            this.sprites.clear()
+        }
 
         serialize(): SheetFormat {
             return { sprites: this.sprites.map(sprite => sprite.serialize()) }
+        }
+
+        deserialize(format: SheetFormat): this {
+            this.clear()
+            format.sprites.forEach(sprite => this.sprites.add(Sprite.fromData(sprite.width, sprite.height, sprite.data, sprite.name)))
+            return this
         }
 
         toString(entriesEachLine: number = 8): string {

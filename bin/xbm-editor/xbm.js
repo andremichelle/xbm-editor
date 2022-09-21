@@ -167,10 +167,19 @@ export var xbm;
     xbm.Sprite = Sprite;
     class Sheet {
         constructor(sprites) {
-            this.sprites = sprites;
+            this.sprites = new ObservableCollection();
+            this.sprites.addAll(sprites);
+        }
+        clear() {
+            this.sprites.clear();
         }
         serialize() {
             return { sprites: this.sprites.map(sprite => sprite.serialize()) };
+        }
+        deserialize(format) {
+            this.clear();
+            format.sprites.forEach(sprite => this.sprites.add(Sprite.fromData(sprite.width, sprite.height, sprite.data, sprite.name)));
+            return this;
         }
         toString(entriesEachLine = 8) {
             return this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n');

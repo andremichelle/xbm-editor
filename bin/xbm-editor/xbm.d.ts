@@ -1,4 +1,4 @@
-import { Observable, ObservableCollection, ObservableValue, Observer, Serializer, Terminable } from '../lib/common.js';
+import { Deserializer, Observable, ObservableCollection, ObservableValue, Observer, Serializer, Terminable } from '../lib/common.js';
 export declare namespace xbm {
     type FrameFormat = {
         data: ReadonlyArray<number>;
@@ -54,10 +54,12 @@ export declare namespace xbm {
     type SheetFormat = {
         sprites: SpriteFormat[];
     };
-    class Sheet implements Serializer<SheetFormat> {
-        readonly sprites: Sprite[];
+    class Sheet implements Serializer<SheetFormat>, Deserializer<SheetFormat> {
+        readonly sprites: ObservableCollection<Sprite>;
         constructor(sprites: Sprite[]);
+        clear(): void;
         serialize(): SheetFormat;
+        deserialize(format: SheetFormat): this;
         toString(entriesEachLine?: number): string;
     }
 }

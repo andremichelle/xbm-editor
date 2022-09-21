@@ -1,5 +1,6 @@
 import { HTML } from "../../lib/dom.js";
 import { xbm } from "../xbm.js";
+import { CollectionEventType } from './../../lib/common.js';
 import { SpriteView } from "./sprite.js";
 export class SheetView {
     constructor(env, sheet) {
@@ -8,7 +9,6 @@ export class SheetView {
         this.element = HTML.create('div', { class: 'sheet-view' });
         this.addSpriteButton = HTML.create('button', { textContent: '+' });
         this.views = new Map();
-        sheet.sprites.forEach(sprite => this.addSprite(sprite));
         this.addSpriteButton.addEventListener('click', () => {
             const sizeInput = prompt('Enter size (w x h)', '8x8');
             if (sizeInput === null)
@@ -22,20 +22,36 @@ export class SheetView {
             if (name === null || name.length === 0)
                 return;
             console.log(`new name: ${name}, w: ${sizeArray[0]}, h: ${sizeArray[1]}`);
-            this.addSprite(xbm.Sprite.single(sizeArray[0], sizeArray[1], name));
+            this.sheet.sprites.add(xbm.Sprite.single(sizeArray[0], sizeArray[1], name));
         });
+        this.sheet.sprites.addObserver((event) => {
+            switch (event.type) {
+                case CollectionEventType.Add: {
+                    const sprite = event.item;
+                    this.views.set(sprite, new SpriteView(this.env, sprite));
+                    this.updateOrder();
+                    break;
+                }
+                case CollectionEventType.Remove: {
+                    const sprite = event.item;
+                    const view = this.views.get(sprite);
+                    console.assert(view !== undefined);
+                    view.terminate();
+                    break;
+                }
+                case CollectionEventType.Order: {
+                    this.updateOrder();
+                    break;
+                }
+            }
+        });
+        sheet.sprites.forEach(sprite => this.views.set(sprite, new SpriteView(this.env, sprite)));
+        this.updateOrder();
     }
-    addSprite(sprite) {
-        const view = new SpriteView(this.env, sprite);
-        this.views.set(sprite, view);
+    updateOrder() {
         this.addSpriteButton.remove();
-        view.appendChildren(this.element);
+        this.sheet.sprites.forEach(sprite => this.views.get(sprite).appendChildren(this.element));
         this.element.appendChild(this.addSpriteButton);
-    }
-    removeSprite(sprite) {
-        const view = this.views.get(sprite);
-        console.assert(view !== undefined);
-        view.terminate();
     }
 }
 //# sourceMappingURL=sheet.js.map

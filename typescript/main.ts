@@ -1,17 +1,9 @@
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
-import { Waiting } from "./lib/common.js"
 import { AnimationFrame, HTML } from './lib/dom.js'
 import { ListItem, Menu, MenuBar } from "./lib/menu.js"
 import { Env } from "./xbm-editor/view/env.js"
 import { SheetView } from "./xbm-editor/view/sheet.js"
 import { xbm } from './xbm-editor/xbm.js'
-
-const showProgress = (() => {
-    const progress: SVGSVGElement = document.querySelector("svg.preloader") as SVGSVGElement
-    window.onerror = () => progress.classList.add("error")
-    window.onunhandledrejection = () => progress.classList.add("error")
-    return (percentage: number) => progress.style.setProperty("--percentage", percentage.toFixed(2))
-})();
 
 (async () => {
     console.debug("booting...")
@@ -45,18 +37,14 @@ const showProgress = (() => {
         .addButton(HTML.query("[data-menu='file']", element), ListItem.root()
             .addListItem(ListItem.default("Open File...", "", false)
                 .onTrigger(async () => {
-                    await Waiting.forFrames(2)
-                    alert('not yet')
-                    if (false) {
-                        try {
-                            const files = await window.showOpenFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' })
-                            if (files.length !== 1) return
-                            const file = await files[0].getFile()
-                            const text = await file.text()
-                            const json = JSON.parse(text)
-                            console.log('open', json) // TODO
-                        } catch (e) { }
-                    }
+                    try {
+                        const files = await window.showOpenFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' })
+                        if (files.length !== 1) return
+                        const file = await files[0].getFile()
+                        const text = await file.text()
+                        const json = JSON.parse(text)
+                        sheet.deserialize(json)
+                    } catch (e) { }
                 }))
             .addListItem(ListItem.default("Save File...", "", false)
                 .onTrigger(async () => {
@@ -72,6 +60,7 @@ const showProgress = (() => {
                     fileStream.write(new Blob([sheet.toString()]))
                     fileStream.close()
                 }))
+            .addListItem(ListItem.default("Clear", "", false).onTrigger(() => sheet.clear()))
         )
         .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
             .addListItem(ListItem.default("Use the context-menu to edit sprites and frames", "", false)
@@ -79,12 +68,6 @@ const showProgress = (() => {
 
     // --- BOOT ENDS ---
 
-    // prevent dragging entire document on mobile
-    document.addEventListener('touchmove', (event: TouchEvent) => event.preventDefault(), { passive: false })
-    document.addEventListener('dblclick', (event: Event) => event.preventDefault(), { passive: false })
-    const resize = () => document.body.style.height = `${window.innerHeight}px`
-    window.addEventListener("resize", resize)
-    resize()
     requestAnimationFrame(() => {
         document.querySelectorAll("body svg.preloader").forEach(element => element.remove())
         document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"))

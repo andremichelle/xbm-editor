@@ -8,6 +8,5 @@ export declare class SheetView {
     readonly addSpriteButton: HTMLButtonElement;
     readonly views: Map<xbm.Sprite, SpriteView>;
     constructor(env: Env, sheet: xbm.Sheet);
-    addSprite(sprite: xbm.Sprite): void;
-    removeSprite(sprite: xbm.Sprite): void;
+    updateOrder(): void;
 }
