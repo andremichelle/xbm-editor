@@ -2,7 +2,7 @@ import { AnimationFrame, HTML } from "../../lib/dom.js"
 import { ListItem, Menu } from "../../lib/menu.js"
 import { xbm } from "../xbm.js"
 import { CollectionEventType, Events, Terminable, Terminator, Waiting } from './../../lib/common.js'
-import { Env } from "./env.js"
+import { ViewContext } from "./context.js"
 import { FrameView } from "./frame.js"
 
 export class Animation {
@@ -26,7 +26,7 @@ export class SpriteView implements Terminable {
     readonly frameContainer: HTMLDivElement = HTML.create('div', { class: 'frame-views' })
     readonly views: Map<xbm.Frame, FrameView> = new Map<xbm.Frame, FrameView>()
 
-    constructor(readonly env: Env, readonly sprite: xbm.Sprite) {
+    constructor(readonly viewContext: ViewContext, readonly sprite: xbm.Sprite) {
         this.preview.appendChild(this.canvas)
 
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name))
@@ -34,7 +34,7 @@ export class SpriteView implements Terminable {
             switch (event.type) {
                 case CollectionEventType.Add: {
                     const frame = event.item!
-                    this.views.set(frame, new FrameView(this.env, frame))
+                    this.views.set(frame, new FrameView(this.viewContext, frame))
                     this.updateOrder()
                     break
                 }
@@ -53,7 +53,7 @@ export class SpriteView implements Terminable {
             }
         }))
 
-        this.sprite.frames.forEach(frame => this.views.set(frame, new FrameView(this.env, frame)))
+        this.sprite.frames.forEach(frame => this.views.set(frame, new FrameView(this.viewContext, frame)))
         this.updateOrder()
 
         let frame = 0 // Increment in single source with adjustable speed
@@ -90,12 +90,13 @@ export class SpriteView implements Terminable {
         }))
         this.terminator.with(Events.bind(this.title, 'contextmenu', (event: MouseEvent) =>
             Menu.ContextMenu.append(
-                ListItem.default('Rename').onTrigger(async () => {
+                ListItem.default('Rename Sprite...').onTrigger(async () => {
                     await Waiting.forFrames(2)
                     const name = prompt('Enter new name', this.sprite.name.get())
                     if (name === null) return
                     this.sprite.name.set(name.trim().toLowerCase())
-                })
+                }),
+                ListItem.default('Delete Sprite').onTrigger(async () => this.viewContext.remove(this.sprite)),
             )))
     }
 

@@ -2,7 +2,7 @@ import { HTML } from "../../lib/dom.js"
 import { xbm } from "../xbm.js"
 import { Events, Terminable, Terminator } from './../../lib/common.js'
 import { ListItem, Menu } from './../../lib/menu.js'
-import { Env } from "./env.js"
+import { ViewContext } from "./context.js"
 
 export class FrameView implements Terminable {
     private readonly terminator = new Terminator()
@@ -11,7 +11,7 @@ export class FrameView implements Terminable {
     readonly canvas: HTMLCanvasElement = HTML.create('canvas')
     readonly context: CanvasRenderingContext2D = this.canvas.getContext('2d')!
 
-    constructor(readonly env: Env, readonly frame: xbm.Frame) {
+    constructor(readonly viewContext: ViewContext, readonly frame: xbm.Frame) {
         this.terminator.with(this.frame.addObserver(this.paint))
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel))
         this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event: MouseEvent) =>
@@ -38,7 +38,7 @@ export class FrameView implements Terminable {
 
     private readonly togglePixel = (event: PointerEvent) => {
         const r = this.canvas.getBoundingClientRect()
-        const z = this.env.zoom.get() | 0
+        const z = this.viewContext.zoom.get() | 0
         const x = Math.floor((event.clientX - r.left) / z) | 0
         const y = Math.floor((event.clientY - r.top) / z) | 0
         this.frame.togglePixel(x, y)
@@ -47,7 +47,7 @@ export class FrameView implements Terminable {
     private readonly paint = (): void => {
         const w = this.frame.size.width | 0
         const h = this.frame.size.height | 0
-        const z = this.env.zoom.get() | 0
+        const z = this.viewContext.zoom.get() | 0
         const s = z - 1
         this.canvas.width = w * z - 1
         this.canvas.height = h * z - 1

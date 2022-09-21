@@ -1,7 +1,6 @@
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
 import { AnimationFrame, HTML } from './lib/dom.js'
 import { ListItem, Menu, MenuBar } from "./lib/menu.js"
-import { Env } from "./xbm-editor/view/env.js"
 import { SheetView } from "./xbm-editor/view/sheet.js"
 import { xbm } from './xbm-editor/xbm.js'
 
@@ -29,7 +28,7 @@ import { xbm } from './xbm-editor/xbm.js'
     AnimationFrame.init()
     Menu.ContextMenu.init()
 
-    HTML.query('main').appendChild(new SheetView(new Env(), sheet).element)
+    HTML.query('main').appendChild(new SheetView(sheet).element)
 
     const element = document.querySelector("nav#app-menu")!
     MenuBar.install()

@@ -2,8 +2,8 @@ import { HTML } from "../../lib/dom.js";
 import { Events, Terminator } from './../../lib/common.js';
 import { ListItem, Menu } from './../../lib/menu.js';
 export class FrameView {
-    constructor(env, frame) {
-        this.env = env;
+    constructor(viewContext, frame) {
+        this.viewContext = viewContext;
         this.frame = frame;
         this.terminator = new Terminator();
         this.element = HTML.create('div', { class: 'frame-view' });
@@ -11,7 +11,7 @@ export class FrameView {
         this.context = this.canvas.getContext('2d');
         this.togglePixel = (event) => {
             const r = this.canvas.getBoundingClientRect();
-            const z = this.env.zoom.get() | 0;
+            const z = this.viewContext.zoom.get() | 0;
             const x = Math.floor((event.clientX - r.left) / z) | 0;
             const y = Math.floor((event.clientY - r.top) / z) | 0;
             this.frame.togglePixel(x, y);
@@ -19,7 +19,7 @@ export class FrameView {
         this.paint = () => {
             const w = this.frame.size.width | 0;
             const h = this.frame.size.height | 0;
-            const z = this.env.zoom.get() | 0;
+            const z = this.viewContext.zoom.get() | 0;
             const s = z - 1;
             this.canvas.width = w * z - 1;
             this.canvas.height = h * z - 1;

@@ -1,11 +1,11 @@
 import { HTML } from "../../lib/dom.js";
 import { xbm } from "../xbm.js";
-import { CollectionEventType } from './../../lib/common.js';
+import { CollectionEventType, ObservableValueImpl } from './../../lib/common.js';
 import { SpriteView } from "./sprite.js";
 export class SheetView {
-    constructor(env, sheet) {
-        this.env = env;
+    constructor(sheet) {
         this.sheet = sheet;
+        this.zoom = new ObservableValueImpl(8);
         this.element = HTML.create('div', { class: 'sheet-view' });
         this.addSpriteButton = HTML.create('button', { textContent: '+' });
         this.views = new Map();
@@ -28,7 +28,7 @@ export class SheetView {
             switch (event.type) {
                 case CollectionEventType.Add: {
                     const sprite = event.item;
-                    this.views.set(sprite, new SpriteView(this.env, sprite));
+                    this.views.set(sprite, new SpriteView(this, sprite));
                     this.updateOrder();
                     break;
                 }
@@ -45,8 +45,11 @@ export class SheetView {
                 }
             }
         });
-        sheet.sprites.forEach(sprite => this.views.set(sprite, new SpriteView(this.env, sprite)));
+        sheet.sprites.forEach(sprite => this.views.set(sprite, new SpriteView(this, sprite)));
         this.updateOrder();
+    }
+    remove(sprite) {
+        this.sheet.sprites.remove(sprite);
     }
     updateOrder() {
         this.addSpriteButton.remove();
