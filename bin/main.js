@@ -63,7 +63,7 @@ import { xbm } from './xbm-editor/xbm.js';
         });
     }))
         .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
-        .addListItem(ListItem.default("Use the context-menu to edit sprites and frames", "", false)
+        .addListItem(ListItem.default("No Help...", "", false)
         .isSelectable(false)));
     requestAnimationFrame(() => {
         document.querySelectorAll("body svg.preloader").forEach(element => element.remove());
