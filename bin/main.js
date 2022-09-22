@@ -15,6 +15,12 @@ import { SheetView } from "./xbm-editor/view/sheet.js";
 import { xbm } from './xbm-editor/xbm.js';
 (() => __awaiter(void 0, void 0, void 0, function* () {
     console.debug("booting...");
+    if (window.showOpenFilePicker === undefined || window.showSaveFilePicker === undefined) {
+        alert('Your browser does not support the file-api. Please use Chrome.');
+        return;
+    }
+    window.onerror = event => alert(`[Running in Chrome?] ${event}`);
+    window.onunhandledrejection = event => alert(`[Running in Chrome?] ${event.reason}`);
     const boot = new Boot();
     boot.await('css', preloadImagesOfCssFile("./bin/main.css"));
     boot.await('format', fetch('./xbm-sheet.json').then(x => x.json()));

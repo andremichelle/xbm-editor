@@ -8,6 +8,11 @@ import { xbm } from './xbm-editor/xbm.js'
 (async () => {
     console.debug("booting...")
 
+    if (window.showOpenFilePicker === undefined || window.showSaveFilePicker === undefined) {
+        alert('Your browser does not support the file-api. Please use Chrome.')
+        return
+    }
+
     window.onerror = event => alert(`[Running in Chrome?] ${event}`)
     window.onunhandledrejection = event => alert(`[Running in Chrome?] ${event.reason}`)
 
