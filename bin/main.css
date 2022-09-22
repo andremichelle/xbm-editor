@@ -306,13 +306,16 @@ main div.sheet-view {
 main div.sheet-view div.menu {
   cursor: context-menu;
   margin: 8px auto 0 auto;
-  flex: 0 0 6px;
+  flex: 0 0 8px;
   width: 96%;
-  border-radius: 3px;
+  border-radius: 4px;
   background-color: #222;
 }
+main div.sheet-view div.menu:hover {
+  background-color: #444;
+}
 main div.sheet-view div.menu.active {
-  border-radius: 3px 3px 0 0;
+  border-radius: 4px 4px 0 0;
   background-color: #575757;
 }
 main div.sheet-view > div.preview {

@@ -50,7 +50,7 @@ export class SpriteView {
                         .addListItem(ListItem.default(xbm.PreviewMode[mode], '', this.sprite.previewMode.get() === mode)
                         .onTrigger(() => this.sprite.previewMode.set(mode)));
                 }
-            }), rect.left - 1, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'));
+            }), rect.left - 24, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'));
         }));
         this.terminator.with(Events.bind(this.frameContainer, 'pointerdown', (event) => {
             const menuItem = event.target;
@@ -69,7 +69,7 @@ export class SpriteView {
                         parentItem.addListItem(...block);
                         separatorBefore = true;
                     });
-                }), rect.left - 1, rect.top + rect.height, false, () => menuItem.classList.remove('active'));
+                }), rect.left - 24, rect.top + rect.height, false, () => menuItem.classList.remove('active'));
             }
         }));
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name));

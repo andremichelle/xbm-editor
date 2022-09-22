@@ -43,7 +43,7 @@ export class SpriteView implements Terminable {
                                 .onTrigger(() => this.sprite.previewMode.set(mode)))
 
                     }
-                }), rect.left - 1, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'))
+                }), rect.left - 24, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'))
 
         }))
 
@@ -64,7 +64,7 @@ export class SpriteView implements Terminable {
                             parentItem.addListItem(...block)
                             separatorBefore = true
                         })
-                    }), rect.left - 1, rect.top + rect.height, false, () => menuItem.classList.remove('active'))
+                    }), rect.left - 24, rect.top + rect.height, false, () => menuItem.classList.remove('active'))
             }
         }))
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name))
