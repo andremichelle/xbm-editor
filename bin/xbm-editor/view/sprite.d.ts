@@ -1,3 +1,4 @@
+import { ListItem } from "../../lib/menu.js";
 import { xbm } from "../xbm.js";
 import { Terminable } from './../../lib/common.js';
 import { ViewContext } from "./context.js";
@@ -19,8 +20,8 @@ export declare class SpriteView implements Terminable {
     readonly frameContainer: HTMLDivElement;
     readonly views: Map<xbm.Frame, FrameView>;
     constructor(viewContext: ViewContext, sprite: xbm.Sprite);
-    appendSpriteMenu(): void;
     appendChildren(parent: ParentNode): void;
+    createMenuItems(view: FrameView): ListItem[][];
     terminate(): void;
     private updateOrder;
 }

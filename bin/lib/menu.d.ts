@@ -18,7 +18,7 @@ export declare class ListItem {
     constructor(data: any);
     static root(): ListItem;
     static default(label: string, shortcut?: string, checked?: boolean): ListItem;
-    addListItem(listItem: ListItem): ListItem;
+    addListItem(...listItems: ListItem[]): ListItem;
     opening(): void;
     trigger(): void;
     isSelectable(value?: boolean): ListItem;

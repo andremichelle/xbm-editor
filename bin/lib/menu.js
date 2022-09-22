@@ -27,12 +27,12 @@ export class ListItem {
     static default(label, shortcut = '', checked = false) {
         return new ListItem(new ListItemDefaultData(label, shortcut, checked));
     }
-    addListItem(listItem) {
+    addListItem(...listItems) {
         if (this.isOpening) {
-            this.transientChildren.push(listItem);
+            this.transientChildren.splice(this.transientChildren.length, 0, ...listItems);
         }
         else {
-            this.permanentChildren.push(listItem);
+            this.permanentChildren.splice(this.permanentChildren.length, 0, ...listItems);
         }
         return this;
     }

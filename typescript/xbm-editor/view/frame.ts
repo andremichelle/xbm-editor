@@ -9,24 +9,15 @@ export class FrameView implements Terminable {
 
     readonly element: HTMLElement = HTML.create('div', { class: 'frame-view' })
     readonly canvas: HTMLCanvasElement = HTML.create('canvas')
+    readonly menu: HTMLDivElement = HTML.create('div', { class: 'menu', 'data-menu': true })
     readonly context: CanvasRenderingContext2D = this.canvas.getContext('2d')!
 
     constructor(readonly viewContext: ViewContext, readonly frame: xbm.Frame) {
         this.terminator.with(this.frame.addObserver(this.paint))
         this.terminator.with(this.viewContext.zoom.addObserver(this.paint))
         this.terminator.with(Events.bind(this.canvas, 'pointerdown', this.togglePixel))
-        this.terminator.with(Events.bind(this.canvas, 'contextmenu', (event: MouseEvent) =>
-            Menu.ContextMenu.append(
-                ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)),
-                ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)),
-                ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)),
-                ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)),
-                ListItem.default('Mirror Vertical').onTrigger(() => this.frame.mirrorVertical()),
-                ListItem.default('Mirror Horizontal').onTrigger(() => this.frame.mirrorHorizontal()),
-                ListItem.default('Clear Pixels').onTrigger(() => this.frame.clear()),
-                ListItem.default('Import Image').onTrigger(() => this.frame.import()),
-            )))
         this.element.appendChild(this.canvas)
+        this.element.appendChild(this.menu)
         this.paint()
     }
 
@@ -38,6 +29,19 @@ export class FrameView implements Terminable {
         this.canvas.remove()
         this.element.remove()
         this.terminator.terminate()
+    }
+
+    createMenuItems(): ListItem[] {
+        return [
+            ListItem.default('Shift Up').onTrigger(() => this.frame.shift(0, -1)),
+            ListItem.default('Shift Right').onTrigger(() => this.frame.shift(1, 0)),
+            ListItem.default('Shift Down').onTrigger(() => this.frame.shift(0, 1)),
+            ListItem.default('Shift Left').onTrigger(() => this.frame.shift(-1, 0)),
+            ListItem.default('Mirror Vertical').onTrigger(() => this.frame.mirrorVertical()),
+            ListItem.default('Mirror Horizontal').onTrigger(() => this.frame.mirrorHorizontal()),
+            ListItem.default('Clear Pixels').onTrigger(() => this.frame.clear()),
+            ListItem.default('Import Image').onTrigger(() => this.frame.import())
+        ]
     }
 
     private readonly togglePixel = (event: PointerEvent) => {
