@@ -1,13 +1,13 @@
 # XBM Editor
-## Planned Features
+## Features
 * Any number of sprites
-* Any size for each sprite + name
-* Any number of frames each sprites for states / animations
-* Any integer zoom 2x, 3x, 4x,...
-* 100% zoom, animated preview (forwards, alternate, one-shot, ...)
+* Any number of frames for each sprites for states / animations
+* Save & load projects and export to c++ header file
+* Shift, mirror pixels
+* Import image
 
-## Preview
-[Open in browser](https://andremichelle.github.io/xbm-editor/) (Developed, tested in Chrome)
+## Preview (Chrome Only)
+[Open in browser](https://andremichelle.github.io/xbm-editor/)
 
 ## Links
 [xbm on wikipedia](https://en.wikipedia.org/wiki/X_BitMap)
