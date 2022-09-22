@@ -59,8 +59,6 @@ main
       border-bottom: $OUTLINE
       text-overflow: ellipsis
       overflow: hidden
-      pointer-events: all
-      cursor: pointer
     > div.frame-views
       min-height: 32px
       display: flex
@@ -86,9 +84,10 @@ main
           flex: 0 0 6px
           width: 96%
           border-radius: 3px
-          background-color: rgba(white, 0.1)
+          background-color: #222
           &.active
-            background-color: rgba(white, 0.7)
+            border-radius: 3px 3px 0 0
+            background-color: #575757
     > button
       margin: 0 0 0 3px
       font-size: 15px

@@ -52,7 +52,7 @@ export class SpriteView {
                         parentItem.addListItem(...block);
                         separatorBefore = true;
                     });
-                }), rect.left, rect.top + rect.height + 1, false, () => menuItem.classList.remove('active'));
+                }), rect.left - 1, rect.top + rect.height, false, () => menuItem.classList.remove('active'));
             }
         }));
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name));

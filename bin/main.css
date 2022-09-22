@@ -155,7 +155,7 @@ nav.menu {
   min-width: 128px;
   max-height: 100%;
   padding: 8px 0;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 8px 8px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.6), 0 8px 8px 0 rgba(0, 0, 0, 0.3);
   pointer-events: all;
 }
 nav.menu.docked {
@@ -335,8 +335,6 @@ main div.sheet-view > h1 {
   border-bottom: 1px rgba(255, 255, 255, 0.1) solid;
   text-overflow: ellipsis;
   overflow: hidden;
-  pointer-events: all;
-  cursor: pointer;
 }
 main div.sheet-view > div.frame-views {
   min-height: 32px;
@@ -370,10 +368,11 @@ main div.sheet-view > div.frame-views > div.frame-view > div.menu {
   flex: 0 0 6px;
   width: 96%;
   border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #222;
 }
 main div.sheet-view > div.frame-views > div.frame-view > div.menu.active {
-  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 3px 3px 0 0;
+  background-color: #575757;
 }
 main div.sheet-view > button {
   margin: 0 0 0 3px;
