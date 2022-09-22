@@ -6,13 +6,13 @@ import { ViewContext } from "./context.js"
 import { FrameView } from "./frame.js"
 
 export class Animation {
-    static readonly Forward = new Animation((frame: number, totalFrames: number) => totalFrames <= 1 ? 0 : frame % totalFrames)
+    static readonly First = new Animation((frame: number, totalFrames: number) => 0)
+    static readonly Loop = new Animation((frame: number, totalFrames: number) => totalFrames <= 1 ? 0 : frame % totalFrames)
     static readonly Alternate = new Animation((frame: number, totalFrames: number) => {
         if (totalFrames <= 1) return 0
         const m = totalFrames - 1
         return Math.abs(m - (frame % (m << 1)))
     })
-
     constructor(readonly map: (frame: number, totalFrames: number) => number) { }
 }
 
@@ -21,6 +21,7 @@ export class SpriteView implements Terminable {
 
     readonly preview: HTMLDivElement = HTML.create('div', { class: 'preview' })
     readonly title: HTMLHeadingElement = HTML.create('h1', { textContent: this.sprite.name.get() })
+    readonly previewMenu = HTML.create('div', { class: 'menu' })
     readonly canvas: HTMLCanvasElement = HTML.create('canvas')
     readonly context: CanvasRenderingContext2D = this.canvas.getContext('2d')!
     readonly frameContainer: HTMLDivElement = HTML.create('div', { class: 'frame-views' })
@@ -28,6 +29,23 @@ export class SpriteView implements Terminable {
 
     constructor(readonly viewContext: ViewContext, readonly sprite: xbm.Sprite) {
         this.preview.appendChild(this.canvas)
+        this.preview.appendChild(this.previewMenu)
+
+        this.terminator.with(Events.bind(this.previewMenu, 'pointerdown', (event: PointerEvent) => {
+            this.previewMenu.classList.add('active')
+            const rect = this.previewMenu.getBoundingClientRect()
+            event.stopPropagation()
+            Menu.Controller.open(ListItem.root()
+                .addRuntimeChildrenCallback(parentItem => {
+                    for (let mode = 0; mode < xbm.PreviewMode._Last; mode++) {
+                        parentItem
+                            .addListItem(ListItem.default(xbm.PreviewMode[mode], '', this.sprite.previewMode.get() === mode)
+                                .onTrigger(() => this.sprite.previewMode.set(mode)))
+
+                    }
+                }), rect.left - 1, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'))
+
+        }))
 
         this.terminator.with(Events.bind(this.frameContainer, 'pointerdown', (event: PointerEvent) => {
             const menuItem = event.target as Element
@@ -76,12 +94,42 @@ export class SpriteView implements Terminable {
         this.sprite.frames.forEach(frame => this.views.set(frame, new FrameView(this.viewContext, frame)))
         this.updateOrder()
 
-        let frame = 0 // Increment in single source with adjustable speed
-        this.terminator.with(AnimationFrame.add(() => {
-            this.canvas.width = sprite.width
-            this.canvas.height = sprite.height
-            this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context)
-        }))
+        const previewSubscriptions = this.terminator.with(new Terminator())
+        const startPainting = (animation: Animation): void => {
+            let frame = 0
+            previewSubscriptions.with(AnimationFrame.add(() => {
+                this.canvas.width = sprite.width
+                this.canvas.height = sprite.height
+                this.sprite.getFrame(animation.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context)
+            }))
+        }
+        const updatePreviewMode = (mode: xbm.PreviewMode) => {
+            previewSubscriptions.terminate()
+            if (mode === xbm.PreviewMode.First) {
+                startPainting(Animation.First)
+            } else if (mode === xbm.PreviewMode.Tile) {
+                let frame = 0
+                previewSubscriptions.with(AnimationFrame.add(() => {
+                    this.canvas.width = sprite.width * 4
+                    this.canvas.height = sprite.height * 4
+                    const frameIndex = Animation.Loop.map(frame++ >> 7, sprite.getFrameCount())
+                    for (let y = 0; y < 4; y++) {
+                        for (let x = 0; x < 4; x++) {
+                            this.context.save()
+                            this.context.translate(x * sprite.width, y * sprite.height)
+                            this.sprite.getFrame(frameIndex).paint(this.context)
+                            this.context.restore()
+                        }
+                    }
+                }))
+            } else if (mode === xbm.PreviewMode.Loop) {
+                startPainting(Animation.Loop)
+            } else if (mode === xbm.PreviewMode.Alternate) {
+                startPainting(Animation.Alternate)
+            }
+        }
+        this.terminator.with(this.sprite.previewMode.addObserver(updatePreviewMode))
+        updatePreviewMode(this.sprite.previewMode.get())
     }
 
     appendChildren(parent: ParentNode): void {

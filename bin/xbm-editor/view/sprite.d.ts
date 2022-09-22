@@ -5,7 +5,8 @@ import { ViewContext } from "./context.js";
 import { FrameView } from "./frame.js";
 export declare class Animation {
     readonly map: (frame: number, totalFrames: number) => number;
-    static readonly Forward: Animation;
+    static readonly First: Animation;
+    static readonly Loop: Animation;
     static readonly Alternate: Animation;
     constructor(map: (frame: number, totalFrames: number) => number);
 }
@@ -15,6 +16,7 @@ export declare class SpriteView implements Terminable {
     private readonly terminator;
     readonly preview: HTMLDivElement;
     readonly title: HTMLHeadingElement;
+    readonly previewMenu: HTMLDivElement;
     readonly canvas: HTMLCanvasElement;
     readonly context: CanvasRenderingContext2D;
     readonly frameContainer: HTMLDivElement;

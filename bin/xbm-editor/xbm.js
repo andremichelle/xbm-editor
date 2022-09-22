@@ -158,12 +158,21 @@ export var xbm;
         }
     }
     xbm.Frame = Frame;
+    let PreviewMode;
+    (function (PreviewMode) {
+        PreviewMode[PreviewMode["First"] = 0] = "First";
+        PreviewMode[PreviewMode["Loop"] = 1] = "Loop";
+        PreviewMode[PreviewMode["Alternate"] = 2] = "Alternate";
+        PreviewMode[PreviewMode["Tile"] = 3] = "Tile";
+        PreviewMode[PreviewMode["_Last"] = 4] = "_Last";
+    })(PreviewMode = xbm.PreviewMode || (xbm.PreviewMode = {}));
     class Sprite {
         constructor(width, height, name) {
             this.width = width;
             this.height = height;
             this.frames = new ObservableCollection();
             this.name = new ObservableValueImpl('');
+            this.previewMode = new ObservableValueImpl(PreviewMode.First);
             this.name.set(name.trim());
         }
         static single(width, height, name) {
@@ -193,7 +202,8 @@ export var xbm;
                 name: this.name.get(),
                 width: this.width,
                 height: this.height,
-                data: this.frames.map(frame => frame.getData().slice())
+                data: this.frames.map(frame => frame.getData().slice()),
+                previewMode: this.previewMode.get()
             };
         }
         toString(entriesEachLine = 8) {
@@ -233,7 +243,11 @@ export var xbm;
         }
         deserialize(format) {
             this.clear();
-            format.sprites.forEach(sprite => this.sprites.add(Sprite.fromData(sprite.width, sprite.height, sprite.data, sprite.name)));
+            format.sprites.forEach(spriteFormat => {
+                const sprite = Sprite.fromData(spriteFormat.width, spriteFormat.height, spriteFormat.data, spriteFormat.name);
+                sprite.previewMode.set(spriteFormat.previewMode);
+                this.sprites.add(sprite);
+            });
             return this;
         }
         toString(entriesEachLine = 8) {

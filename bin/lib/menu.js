@@ -276,7 +276,10 @@ export class Menu {
                     this.childMenu = null;
                 }
             };
+            const now = Date.now();
             div.onpointerup = event => {
+                if (Date.now() < now + 500)
+                    return;
                 event.preventDefault();
                 if (null === this.childMenu) {
                     div.addEventListener("animationend", () => {

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { AnimationFrame, HTML } from "../../lib/dom.js";
 import { ListItem, Menu } from "../../lib/menu.js";
+import { xbm } from "../xbm.js";
 import { CollectionEventType, Events, Terminator, Waiting } from './../../lib/common.js';
 import { FrameView } from "./frame.js";
 export class Animation {
@@ -16,7 +17,8 @@ export class Animation {
         this.map = map;
     }
 }
-Animation.Forward = new Animation((frame, totalFrames) => totalFrames <= 1 ? 0 : frame % totalFrames);
+Animation.First = new Animation((frame, totalFrames) => 0);
+Animation.Loop = new Animation((frame, totalFrames) => totalFrames <= 1 ? 0 : frame % totalFrames);
 Animation.Alternate = new Animation((frame, totalFrames) => {
     if (totalFrames <= 1)
         return 0;
@@ -30,11 +32,26 @@ export class SpriteView {
         this.terminator = new Terminator();
         this.preview = HTML.create('div', { class: 'preview' });
         this.title = HTML.create('h1', { textContent: this.sprite.name.get() });
+        this.previewMenu = HTML.create('div', { class: 'menu' });
         this.canvas = HTML.create('canvas');
         this.context = this.canvas.getContext('2d');
         this.frameContainer = HTML.create('div', { class: 'frame-views' });
         this.views = new Map();
         this.preview.appendChild(this.canvas);
+        this.preview.appendChild(this.previewMenu);
+        this.terminator.with(Events.bind(this.previewMenu, 'pointerdown', (event) => {
+            this.previewMenu.classList.add('active');
+            const rect = this.previewMenu.getBoundingClientRect();
+            event.stopPropagation();
+            Menu.Controller.open(ListItem.root()
+                .addRuntimeChildrenCallback(parentItem => {
+                for (let mode = 0; mode < xbm.PreviewMode._Last; mode++) {
+                    parentItem
+                        .addListItem(ListItem.default(xbm.PreviewMode[mode], '', this.sprite.previewMode.get() === mode)
+                        .onTrigger(() => this.sprite.previewMode.set(mode)));
+                }
+            }), rect.left - 1, rect.top + rect.height, false, () => this.previewMenu.classList.remove('active'));
+        }));
         this.terminator.with(Events.bind(this.frameContainer, 'pointerdown', (event) => {
             const menuItem = event.target;
             if (menuItem.matches('[data-menu=true]')) {
@@ -80,12 +97,45 @@ export class SpriteView {
         }));
         this.sprite.frames.forEach(frame => this.views.set(frame, new FrameView(this.viewContext, frame)));
         this.updateOrder();
-        let frame = 0;
-        this.terminator.with(AnimationFrame.add(() => {
-            this.canvas.width = sprite.width;
-            this.canvas.height = sprite.height;
-            this.sprite.getFrame(Animation.Alternate.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context);
-        }));
+        const previewSubscriptions = this.terminator.with(new Terminator());
+        const startPainting = (animation) => {
+            let frame = 0;
+            previewSubscriptions.with(AnimationFrame.add(() => {
+                this.canvas.width = sprite.width;
+                this.canvas.height = sprite.height;
+                this.sprite.getFrame(animation.map(frame++ >> 3, sprite.getFrameCount())).paint(this.context);
+            }));
+        };
+        const updatePreviewMode = (mode) => {
+            previewSubscriptions.terminate();
+            if (mode === xbm.PreviewMode.First) {
+                startPainting(Animation.First);
+            }
+            else if (mode === xbm.PreviewMode.Tile) {
+                let frame = 0;
+                previewSubscriptions.with(AnimationFrame.add(() => {
+                    this.canvas.width = sprite.width * 4;
+                    this.canvas.height = sprite.height * 4;
+                    const frameIndex = Animation.Loop.map(frame++ >> 7, sprite.getFrameCount());
+                    for (let y = 0; y < 4; y++) {
+                        for (let x = 0; x < 4; x++) {
+                            this.context.save();
+                            this.context.translate(x * sprite.width, y * sprite.height);
+                            this.sprite.getFrame(frameIndex).paint(this.context);
+                            this.context.restore();
+                        }
+                    }
+                }));
+            }
+            else if (mode === xbm.PreviewMode.Loop) {
+                startPainting(Animation.Loop);
+            }
+            else if (mode === xbm.PreviewMode.Alternate) {
+                startPainting(Animation.Alternate);
+            }
+        };
+        this.terminator.with(this.sprite.previewMode.addObserver(updatePreviewMode));
+        updatePreviewMode(this.sprite.previewMode.get());
     }
     appendChildren(parent) {
         parent.appendChild(this.preview);

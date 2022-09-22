@@ -173,11 +173,16 @@ export namespace xbm {
         }
     }
 
+    export enum PreviewMode {
+        First, Loop, Alternate, Tile, _Last
+    }
+
     export type SpriteFormat = {
         name: string,
         width: number
         height: number
         data: number[][]
+        previewMode: PreviewMode
     }
 
     export class Sprite implements Serializer<SpriteFormat>, Size {
@@ -195,6 +200,7 @@ export namespace xbm {
 
         readonly frames: ObservableCollection<Frame> = new ObservableCollection<Frame>()
         readonly name: ObservableValue<string> = new ObservableValueImpl<string>('')
+        readonly previewMode: ObservableValue<PreviewMode> = new ObservableValueImpl<PreviewMode>(PreviewMode.First)
 
         constructor(readonly width: number, readonly height: number, name: string) {
             this.name.set(name.trim())
@@ -220,7 +226,8 @@ export namespace xbm {
                 name: this.name.get(),
                 width: this.width,
                 height: this.height,
-                data: this.frames.map(frame => frame.getData().slice())
+                data: this.frames.map(frame => frame.getData().slice()),
+                previewMode: this.previewMode.get()
             }
         }
 
@@ -270,7 +277,11 @@ export namespace xbm {
 
         deserialize(format: SheetFormat): this {
             this.clear()
-            format.sprites.forEach(sprite => this.sprites.add(Sprite.fromData(sprite.width, sprite.height, sprite.data, sprite.name)))
+            format.sprites.forEach(spriteFormat => {
+                const sprite = Sprite.fromData(spriteFormat.width, spriteFormat.height, spriteFormat.data, spriteFormat.name)
+                sprite.previewMode.set(spriteFormat.previewMode)
+                this.sprites.add(sprite)
+            })
             return this
         }
 

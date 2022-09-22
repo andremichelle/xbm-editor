@@ -31,11 +31,19 @@ export declare namespace xbm {
         private toBitMask;
         private toByteIndex;
     }
+    enum PreviewMode {
+        First = 0,
+        Loop = 1,
+        Alternate = 2,
+        Tile = 3,
+        _Last = 4
+    }
     type SpriteFormat = {
         name: string;
         width: number;
         height: number;
         data: number[][];
+        previewMode: PreviewMode;
     };
     class Sprite implements Serializer<SpriteFormat>, Size {
         readonly width: number;
@@ -44,6 +52,7 @@ export declare namespace xbm {
         static fromData(width: number, height: number, data: number[][], name: string): Sprite;
         readonly frames: ObservableCollection<Frame>;
         readonly name: ObservableValue<string>;
+        readonly previewMode: ObservableValue<PreviewMode>;
         constructor(width: number, height: number, name: string);
         insertFrame(insertIndex?: number): Frame;
         removeFrame(frame: Frame): void;
