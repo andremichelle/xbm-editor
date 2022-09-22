@@ -8,7 +8,10 @@ export declare class SheetView implements ViewContext {
     readonly element: HTMLElement;
     readonly addSpriteButton: HTMLButtonElement;
     readonly views: Map<xbm.Sprite, SpriteView>;
+    private readonly position;
     constructor(sheet: xbm.Sheet);
     remove(sprite: xbm.Sprite): void;
     updateOrder(): void;
+    center(): void;
+    updatePosition(): void;
 }

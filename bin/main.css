@@ -293,6 +293,9 @@ main div.sheet-view {
   height: -webkit-min-content;
   height: -moz-min-content;
   height: min-content;
+  top: 0;
+  left: 0;
+  position: absolute;
   display: grid;
   grid-template-columns: -webkit-min-content 24px -webkit-min-content;
   grid-template-columns: min-content 24px min-content;

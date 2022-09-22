@@ -1,3 +1,4 @@
+import { Waiting } from './lib/common.js'
 import { Boot, preloadImagesOfCssFile } from "./lib/boot.js"
 import { AnimationFrame, HTML } from './lib/dom.js'
 import { ListItem, Menu, MenuBar } from "./lib/menu.js"
@@ -70,6 +71,7 @@ import { xbm } from './xbm-editor/xbm.js'
                     parentItem.addListItem(ListItem.default(`${zoomLevel}x`, '', sheetView.zoom.get() === zoomLevel)
                         .onTrigger(() => sheetView.zoom.set(zoomLevel)))
                 })
+                parentItem.addListItem(ListItem.default('Center').onTrigger(() => sheetView.center()))
             })
         )
         .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
@@ -83,4 +85,6 @@ import { xbm } from './xbm-editor/xbm.js'
         document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"))
     })
     console.debug("boot complete.")
+    await Waiting.forFrame()
+    sheetView.center()
 })()

@@ -9,6 +9,7 @@ export class SheetView {
         this.element = HTML.create('div', { class: 'sheet-view' });
         this.addSpriteButton = HTML.create('button', { textContent: '+' });
         this.views = new Map();
+        this.position = { x: 0, y: 100 };
         this.addSpriteButton.addEventListener('click', () => {
             const sizeInput = prompt('Enter size (w x h)', '8x8');
             if (sizeInput === null)
@@ -45,6 +46,21 @@ export class SheetView {
                 }
             }
         });
+        document.addEventListener('pointerdown', (event) => {
+            if (event.target === this.element || event.target === document.body) {
+                const pointerX = event.clientX;
+                const pointerY = event.clientY;
+                const startX = this.position.x;
+                const startY = this.position.y;
+                const pointerMove = (event) => {
+                    this.position.x = startX + (event.clientX - pointerX);
+                    this.position.y = startY + (event.clientY - pointerY);
+                    this.updatePosition();
+                };
+                document.addEventListener('pointermove', pointerMove);
+                document.addEventListener('pointerup', () => document.removeEventListener('pointermove', pointerMove), { once: true });
+            }
+        });
         sheet.sprites.forEach(sprite => this.views.set(sprite, new SpriteView(this, sprite)));
         this.updateOrder();
     }
@@ -55,6 +71,14 @@ export class SheetView {
         this.addSpriteButton.remove();
         this.sheet.sprites.forEach(sprite => this.views.get(sprite).appendChildren(this.element));
         this.element.appendChild(this.addSpriteButton);
+    }
+    center() {
+        this.position.x = (window.innerWidth - this.element.clientWidth) * 0.5;
+        this.position.y = (window.innerHeight - this.element.clientHeight) * 0.5;
+        this.updatePosition();
+    }
+    updatePosition() {
+        this.element.style.transform = `translate(${this.position.x}px, ${this.position.y}px)`;
     }
 }
 //# sourceMappingURL=sheet.js.map
