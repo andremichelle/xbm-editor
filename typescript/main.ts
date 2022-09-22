@@ -55,21 +55,25 @@ import { xbm } from './xbm-editor/xbm.js'
                         const text = await file.text()
                         const json = JSON.parse(text)
                         sheet.deserialize(json)
-                    } catch (e) { }
+                    } catch (e) { console.warn(e) }
                 }))
             .addListItem(ListItem.default("Save File...", "", false)
                 .onTrigger(async () => {
-                    const handler = await window.showSaveFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' })
-                    const fileStream = await handler.createWritable()
-                    fileStream.write(new Blob([JSON.stringify(sheet.serialize())], { type: "application/json" }))
-                    fileStream.close()
+                    try {
+                        const handler = await window.showSaveFilePicker({ multiple: false, suggestedName: 'xbm-sheet.json' })
+                        const fileStream = await handler.createWritable()
+                        fileStream.write(new Blob([JSON.stringify(sheet.serialize())], { type: "application/json" }))
+                        fileStream.close()
+                    } catch (e) { console.warn(e) }
                 }))
             .addListItem(ListItem.default("Export C++...", "", false)
                 .onTrigger(async () => {
-                    const handler = await window.showSaveFilePicker({ multiple: false, suggestedName: 'sprites.h' })
-                    const fileStream = await handler.createWritable()
-                    fileStream.write(new Blob([sheet.toString()]))
-                    fileStream.close()
+                    try {
+                        const handler = await window.showSaveFilePicker({ multiple: false, suggestedName: 'sprites.h' })
+                        const fileStream = await handler.createWritable()
+                        fileStream.write(new Blob([sheet.toString()]))
+                        fileStream.close()
+                    } catch (e) { console.warn(e) }
                 }))
             .addListItem(ListItem.default("Clear", "", false).onTrigger(() => sheet.clear()))
         )

@@ -286,7 +286,7 @@ export namespace xbm {
         }
 
         toString(entriesEachLine: number = 8): string {
-            return this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n')
+            return '/*\n * https://github.com/andremichelle/xbm-editor\n */\n\n' + this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n')
         }
     }
 }

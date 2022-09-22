@@ -251,7 +251,7 @@ export var xbm;
             return this;
         }
         toString(entriesEachLine = 8) {
-            return this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n');
+            return '/*\n * https://github.com/andremichelle/xbm-editor\n */\n\n' + this.sprites.map(sprite => sprite.toString(entriesEachLine)).join('\n\n');
         }
     }
     xbm.Sheet = Sheet;
