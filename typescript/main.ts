@@ -8,6 +8,9 @@ import { xbm } from './xbm-editor/xbm.js'
 (async () => {
     console.debug("booting...")
 
+    window.onerror = event => alert(`[Running in Chrome?] ${event}`)
+    window.onunhandledrejection = event => alert(`[Running in Chrome?] ${event.reason}`)
+
     // --- BOOT STARTS ---
 
     const boot = new Boot()
