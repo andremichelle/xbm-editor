@@ -31,7 +31,7 @@ export declare class ListItem {
     removeTransientChildren(): void;
 }
 declare class Controller {
-    private readonly mouseDownHandler;
+    private readonly pointerDownHandler;
     private root;
     private layer;
     private onClose;

@@ -103,14 +103,14 @@ export class ListItem {
 }
 
 class Controller {
-    private readonly mouseDownHandler: (event: MouseEvent) => void
+    private readonly pointerDownHandler: (event: PointerEvent) => void
 
     private root: Menu | null = null
     private layer: HTMLElement | null = null
     private onClose: (() => void) | null = null
 
     constructor() {
-        this.mouseDownHandler = event => {
+        this.pointerDownHandler = event => {
             if (null === this.root) {
                 throw new Error("No root")
             }
@@ -137,7 +137,7 @@ class Controller {
         this.root.moveTo(x, y)
         this.root.attach(this.layer, null)
         this.onClose = onClose
-        window.addEventListener("mousedown", this.mouseDownHandler, true)
+        window.addEventListener("pointerdown", this.pointerDownHandler, true)
     }
 
     close() {
@@ -154,7 +154,7 @@ class Controller {
 
     onDispose(pullDown: Menu) {
         if (this.root === pullDown) {
-            window.removeEventListener("mousedown", this.mouseDownHandler, true)
+            window.removeEventListener("pointerdown", this.pointerDownHandler, true)
             this.root = null
         }
     }
@@ -277,7 +277,7 @@ export class Menu {
             if (listItem.hasChildren()) {
                 div.classList.add("has-children")
             }
-            div.onmouseenter = () => {
+            div.onpointerenter = () => {
                 if (null !== this.selectedDiv) {
                     this.selectedDiv.classList.remove("selected")
                     this.selectedDiv = null
@@ -300,7 +300,7 @@ export class Menu {
                     this.childMenu.attach(this.element.parentElement!, this)
                 }
             }
-            div.onmouseleave = event => {
+            div.onpointerleave = event => {
                 if (this.isChild(event.relatedTarget as Node)) {
                     return
                 }
@@ -311,7 +311,7 @@ export class Menu {
                     this.childMenu = null
                 }
             }
-            div.onmouseup = event => {
+            div.onpointerup = event => {
                 event.preventDefault()
                 if (null === this.childMenu) {
                     div.addEventListener("animationend", () => {
@@ -403,7 +403,7 @@ export class Menu {
             return true
         }
         const setup = (button: HTMLElement, direction: number) => {
-            button.onmouseenter = () => {
+            button.onpointerenter = () => {
                 if (!canScroll(direction)) {
                     return
                 }
@@ -421,9 +421,9 @@ export class Menu {
                     }
                 }
                 window.requestAnimationFrame(scrolling)
-                button.onmouseleave = () => {
+                button.onpointerleave = () => {
                     active = false
-                    button.onmouseup = null
+                    button.onpointerup = null
                 }
             }
         }
@@ -463,8 +463,8 @@ export class MenuBar {
     }
 
     addButton(button: HTMLElement, listItem: ListItem): MenuBar {
-        button.onmousedown = () => this.open(button, listItem)
-        button.onmouseenter = () => {
+        button.onpointerdown = () => this.open(button, listItem)
+        button.onpointerenter = () => {
             if (null !== this.openListItem && this.openListItem !== listItem) {
                 this.open(button, listItem)
             }

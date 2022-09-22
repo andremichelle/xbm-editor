@@ -35,6 +35,7 @@ export class SpriteView implements Terminable {
                 const view = this.sprite.frames.map(frame => this.views.get(frame)!).find(view => view.contains(event.target as Node))!
                 menuItem.classList.add('active')
                 const rect = menuItem.getBoundingClientRect()
+                event.stopPropagation()
                 Menu.Controller.open(ListItem.root()
                     .addRuntimeChildrenCallback(parentItem => {
                         let separatorBefore = false
@@ -45,7 +46,7 @@ export class SpriteView implements Terminable {
                             parentItem.addListItem(...block)
                             separatorBefore = true
                         })
-                    }), rect.left, rect.top, false, () => menuItem.classList.remove('active'))
+                    }), rect.left, rect.top + rect.height + 1, false, () => menuItem.classList.remove('active'))
             }
         }))
         this.terminator.with(this.sprite.name.addObserver(name => this.title.textContent = name))
