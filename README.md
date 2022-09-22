@@ -1,4 +1,5 @@
 # XBM Editor
+![alt screenshot](screenshot.png)
 ## Features
 * Any number of sprites
 * Any number of frames for each sprites for states / animations
