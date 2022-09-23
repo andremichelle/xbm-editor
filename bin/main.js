@@ -81,10 +81,7 @@ import { xbm } from './xbm-editor/xbm.js';
                 .onTrigger(() => sheetView.zoom.set(zoomLevel)));
         });
         parentItem.addListItem(ListItem.default('Center').onTrigger(() => sheetView.center()));
-    }))
-        .addButton(HTML.query("[data-menu='help']", element), ListItem.root()
-        .addListItem(ListItem.default("No Help...", "", false)
-        .isSelectable(false)));
+    }));
     requestAnimationFrame(() => {
         document.querySelectorAll("body svg.preloader").forEach(element => element.remove());
         document.querySelectorAll("body main").forEach(element => element.classList.remove("invisible"));
