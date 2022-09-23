@@ -14,6 +14,6 @@ export declare class FrameView implements Terminable {
     contains(target: Node | null): boolean;
     terminate(): void;
     createMenuItems(): ListItem[];
-    private readonly togglePixel;
     private readonly paint;
+    import(): Promise<void>;
 }

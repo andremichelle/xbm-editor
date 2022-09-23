@@ -8,7 +8,7 @@ html, body {
   -webkit-overflow-scrolling: touch;
   touch-action: manipulation;
   color: #eaeaea;
-  background-color: #1A1A1A;
+  background-color: #222;
 }
 
 html {
@@ -155,7 +155,7 @@ nav.menu {
   min-width: 128px;
   max-height: 100%;
   padding: 8px 0;
-  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.6), 0 8px 8px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.1), 0 8px 8px 0 rgba(0, 0, 0, 0.1);
   pointer-events: all;
 }
 nav.menu.docked {
@@ -270,9 +270,9 @@ div.top {
   top: 0;
   left: 0;
   right: 0;
-  height: 32px;
+  height: 28px;
   position: absolute;
-  background-color: black;
+  background-color: #1A1A1A;
 }
 div.top > nav {
   top: 0;
@@ -280,10 +280,11 @@ div.top > nav {
   padding: 8px;
   position: absoluteØ;
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 div.top > nav > button {
   padding: 0 4px;
+  line-height: 15px;
 }
 
 main div.sheet-view {
@@ -304,7 +305,7 @@ main div.sheet-view {
   row-gap: 16px;
 }
 main div.sheet-view div.menu {
-  cursor: context-menu;
+  cursor: pointer;
   margin: 8px auto 0 auto;
   flex: 0 0 8px;
   width: 96%;
@@ -376,7 +377,6 @@ main div.sheet-view > div.frame-views > div.frame-view {
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.5) inset;
 }
 main div.sheet-view > div.frame-views > div.frame-view > canvas {
-  cursor: pointer;
   -ms-interpolation-mode: nearest-neighbor;
       image-rendering: -moz-crisp-edges;
       image-rendering: pixelated;

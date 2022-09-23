@@ -6,18 +6,19 @@ div.top
   top: 0
   left: 0
   right: 0
-  height: 32px
+  height: 28px
   position: absolute
-  background-color: black
+  background-color: #1A1A1A
   > nav
     top: 0
     left: 0
     padding: 8px
     position: absoluteØ
     display: flex
-    gap: 8px
+    gap: 4px
     > button
       padding: 0 4px
+      line-height: 15px
 
 $OUTLINE: 1px rgba(white, 0.1) solid
 
@@ -33,7 +34,7 @@ main
     column-gap: 0
     row-gap: 16px
     div.menu
-      cursor: context-menu
+      cursor: pointer
       margin: 8px auto 0 auto
       flex: 0 0 8px
       width: 96%
@@ -92,7 +93,6 @@ main
         overflow: hidden
         box-shadow: 0 0 1px 0 rgba(black, 0.5) inset
         > canvas
-          cursor: pointer
           image-rendering: pixelated
     > button
       margin: 0 0 0 3px

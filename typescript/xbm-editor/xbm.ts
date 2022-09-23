@@ -164,11 +164,11 @@ export namespace xbm {
             this.observable.terminate()
         }
 
-        private toBitMask(x: number): number {
+        toBitMask(x: number): number {
             return 1 << (x & 7)
         }
 
-        private toByteIndex(x: number, y: number): number {
+        toByteIndex(x: number, y: number): number {
             return y * Math.ceil(this.size.width / 8.0) + (x >> 3)
         }
     }

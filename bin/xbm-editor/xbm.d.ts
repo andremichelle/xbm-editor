@@ -28,8 +28,8 @@ export declare namespace xbm {
         getData(): ReadonlyArray<number>;
         paint(context: CanvasRenderingContext2D, style?: string): void;
         terminate(): void;
-        private toBitMask;
-        private toByteIndex;
+        toBitMask(x: number): number;
+        toByteIndex(x: number, y: number): number;
     }
     enum PreviewMode {
         First = 0,
