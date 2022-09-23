@@ -36,21 +36,22 @@ main
     div.menu
       cursor: pointer
       margin: 8px auto 0 auto
-      flex: 0 0 8px
-      width: 96%
-      border-radius: 4px
-      background-color: #222
+      flex: 0 0 10px
+      width: 10px
+      border-radius: 10px
+      border: 1px rgba(white, 0.04) solid
+      background-color: rgba(white, 0.04)
       &:hover
         background-color: #444
       &.active
-        border-radius: 4px 4px 0 0
+        border-radius: 10px 10px 0 0
         background-color: #575757
     > div.preview
-      margin: 0 24px
+      margin: 0 24px 9px 24px
       display: flex
       flex-direction: column
       align-items: center
-      justify-content: center
+      justify-content: end
       > canvas
         padding: 8px
         border-radius: 3px
